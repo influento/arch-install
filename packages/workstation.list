@@ -71,6 +71,9 @@ libreoffice-fresh
 # Code editor
 code
 
+# VPN
+wireguard-tools
+
 # Communication
 telegram-desktop
 discord
