@@ -1,0 +1,69 @@
+# packages/workstation.list — Desktop environment packages
+
+# Sway + Wayland
+sway
+swaylock
+swayidle
+xdg-desktop-portal-wlr
+
+# Bar
+waybar
+
+# Wallpaper
+swaybg
+
+# Launcher
+wofi
+
+# Display manager
+sddm
+qt6-svg
+qt6-declarative
+
+# Terminal
+ghostty
+
+# File manager (TUI)
+yazi
+
+# Screenshot / clipboard
+grim
+slurp
+wl-clipboard
+
+# Qt Wayland support (native rendering instead of XWayland fallback)
+qt5-wayland
+qt6-wayland
+
+# Brightness control (laptop keys — harmless on desktop)
+brightnessctl
+
+# Authentication agent (needed for privilege escalation prompts in Sway)
+polkit-gnome
+
+# Bluetooth
+bluez
+bluez-utils
+
+# Theming
+adwaita-icon-theme
+papirus-icon-theme
+breeze-gtk
+qt6ct
+kvantum
+
+# Tray icon support (needed for Chrome, JB Toolbox, Dropbox, etc.)
+libappindicator-gtk3
+
+# Blue light filter (Wayland-native, minimal)
+wlsunset
+
+# Clipboard history (Wayland-native, pairs with wl-clipboard)
+cliphist
+
+# Desktop applications
+obsidian
+keepassxc
+obs-studio
+gimp
+libreoffice-fresh

@@ -1,0 +1,17 @@
+# packages/audio.list — Audio stack (PipeWire)
+
+pipewire
+pipewire-alsa
+pipewire-jack
+pipewire-pulse
+wireplumber
+alsa-utils
+pamixer
+
+# GUI mixer (PipeWire troubleshooting)
+pavucontrol
+
+# Firmware for modern Intel audio (SOF-based laptops, 10th gen+)
+# Harmless on non-Intel — just sits unused
+sof-firmware
+alsa-ucm-conf

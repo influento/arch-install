@@ -1,0 +1,53 @@
+# packages/base.list — Core system packages (installed via pacstrap)
+# Shared by all profiles.
+
+# Kernel and firmware
+base
+linux
+linux-lts
+linux-firmware
+linux-headers
+linux-lts-headers
+
+# CPU microcode (both included, only matching CPU loads at boot)
+amd-ucode
+intel-ucode
+
+# Essential system tools
+base-devel
+sudo
+networkmanager
+
+# Shell
+zsh
+
+# Editor
+neovim
+
+# Filesystem tools
+e2fsprogs
+dosfstools
+btrfs-progs
+
+# Boot
+efibootmgr
+
+# Hardware detection
+pciutils
+usbutils
+
+# Docs
+man-db
+man-pages
+texinfo
+
+# Misc essentials
+git
+curl
+wget
+less
+which
+unzip
+tar
+bash-completion
+reflector

@@ -1,0 +1,15 @@
+# Claude Code
+.claude/
+
+# Downloaded stock ISOs (tests/download-iso.ps1 saves here)
+tests/iso/
+
+# Custom ISO build artifacts (iso/build.sh output)
+iso/out/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~

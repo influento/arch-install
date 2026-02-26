@@ -1,0 +1,44 @@
+# packages/dev-tools.list — Developer CLI tooling
+
+# Editors
+neovim
+tmux
+
+# Git
+git
+lazygit
+
+# Docker
+docker
+docker-compose
+docker-buildx
+
+# Modern CLI replacements
+fzf
+ripgrep
+bat
+eza
+zoxide
+fd
+
+# Prompt (zsh is in base.list)
+starship
+
+# System monitor
+btop
+
+# Linting
+shellcheck
+
+# System info
+fastfetch
+
+# Languages and runtimes
+python
+python-pip
+nodejs
+npm
+rust
+go
+dotnet-sdk
+aspnet-runtime

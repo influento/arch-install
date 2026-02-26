@@ -1,0 +1,2 @@
+# Extra packages added to the custom ISO beyond stock releng
+git
