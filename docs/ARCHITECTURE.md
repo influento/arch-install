@@ -5,7 +5,7 @@
 | Decision | Choice | Rationale |
 |---|---|---|
 | Boot mode | **UEFI only** | All modern hardware; simplifies code (no GRUB/MBR path) |
-| Bootloader | **systemd-boot** | Lightweight, native UEFI, no GRUB complexity |
+| Bootloader | **GRUB + os-prober** | Dual-boot support (detects Windows), Catppuccin Mocha theme |
 | Default filesystem | **ext4** | Battle-tested; btrfs available as option |
 | Kernel | **linux + linux-lts** | Both installed; LTS as fallback boot entry |
 | Hibernation | **Enabled** | resume hook + swap UUID in boot params |
@@ -20,6 +20,7 @@
 | Browser | **Google Chrome** (AUR) | Installed via yay |
 | Terminal | **Ghostty** | Single terminal, no fallback needed |
 | File manager | **yazi** (TUI) | Lightweight, terminal-native |
+| Login | **TTY autologin** | No display manager; Sway auto-launches from .zshrc |
 | Virtualization | **QEMU/KVM** | Kernel-native hypervisor, virt-manager GUI |
 
 ---
@@ -64,7 +65,7 @@ install.sh
   │   ├── Hostname + /etc/hosts
   │   ├── DNS (systemd-resolved)
   │   ├── Initramfs (+ resume hook for hibernation)
-  │   ├── Bootloader (systemd-boot: linux + linux-lts + fallbacks)
+  │   ├── Bootloader (GRUB: os-prober, Catppuccin theme, UEFI first boot)
   │   ├── Set root + user passwords (collected up front)
   │   ├── Create user with sudo (zsh shell)
   │   └── Enable base services
@@ -73,11 +74,12 @@ install.sh
   │   ├── Temp passwordless sudo for install
   │   ├── Base setup (AUR helper + dotfiles deployment)
   │   ├── Install workstation package lists
-  │   ├── Run feature modules (GPU, SDDM, firewall, SSH, virtualization)
+  │   ├── Run feature modules (GPU, firewall, SSH, virtualization)
   │   ├── Inline setup (docker group, env vars, font cache)
   │   ├── Install AUR packages (google-chrome, dropbox, python-gpgme)
   │   ├── Install global npm tools (claude-code)
-  │   ├── Enable services (sddm, bluetooth, docker)
+  │   ├── TTY1 autologin (Sway auto-launches from .zshrc)
+  │   ├── Enable services (bluetooth, docker)
   │   └── Remove temp sudo rule
   │
   ├── Post-chroot fixups (resolv.conf symlink)
@@ -106,7 +108,7 @@ wipe or keep `/home`. If kept, only partitions 1-3 are recreated.
 ## Dual-Boot Notes
 
 On a machine with two SSDs (e.g., Windows on one, Arch on the other):
-- Each SSD gets its own EFI partition and bootloader
-- Use the motherboard's UEFI boot menu (F12/F8/Del) to switch between OSes
-- systemd-boot does not auto-detect Windows — OS switching is at firmware level
-- The installer only touches the selected target disk
+- GRUB with `os-prober` auto-detects Windows on other disks
+- Both Arch and Windows appear in the GRUB boot menu
+- Set GRUB as first UEFI boot entry via `efibootmgr` — no need for firmware boot menu
+- The installer only touches the selected target disk (Windows EFI is read-only for detection)

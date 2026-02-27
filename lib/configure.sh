@@ -95,72 +95,66 @@ configure_bootloader() {
   log_info "Installing bootloader: $BOOTLOADER"
 
   case "$BOOTLOADER" in
-    systemd-boot)
-      run_logged "Installing systemd-boot" bootctl install
+    grub)
+      # Enable os-prober for dual-boot detection (Windows, etc.)
+      sed -i 's/^#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
 
-      # Loader configuration
-      cat > /boot/loader/loader.conf <<'EOF'
-default arch.conf
-timeout 3
-console-mode max
-editor  no
-EOF
-
-      # Determine microcode initrd lines.
-      # Both amd-ucode and intel-ucode are installed; include whichever exist.
-      # systemd-boot loads only the matching CPU's microcode and ignores the other.
-      local microcode_lines=""
-      if [[ -f /boot/amd-ucode.img ]]; then
-        microcode_lines+="initrd  /amd-ucode.img"$'\n'
-      fi
-      if [[ -f /boot/intel-ucode.img ]]; then
-        microcode_lines+="initrd  /intel-ucode.img"$'\n'
-      fi
-
-      # Build kernel options
-      local root_uuid
-      root_uuid="$(findmnt -no UUID /)"
-      local base_opts="root=UUID=${root_uuid} rw"
-
-      # Add resume= for hibernation
+      # Add hibernation resume parameter to kernel command line
       if [[ -n "$SWAP_UUID" ]]; then
-        base_opts="${base_opts} resume=UUID=${SWAP_UUID}"
+        sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"\(.*\)\"|GRUB_CMDLINE_LINUX_DEFAULT=\"\1 resume=UUID=${SWAP_UUID}\"|" /etc/default/grub
       fi
 
-      # --- linux (standard kernel) entries ---
-      cat > /boot/loader/entries/arch.conf <<EOF
-title   Arch Linux
-linux   /vmlinuz-linux
-${microcode_lines}initrd  /initramfs-linux.img
-options ${base_opts} quiet
-EOF
+      # Install Catppuccin Mocha GRUB theme
+      log_info "Installing Catppuccin Mocha GRUB theme..."
+      local theme_dir="/boot/grub/themes/catppuccin-mocha"
+      local tmp_dir
+      tmp_dir="$(mktemp -d)"
+      git clone --depth 1 https://github.com/catppuccin/grub.git "$tmp_dir"
+      mkdir -p "$theme_dir"
+      cp -r "$tmp_dir/src/catppuccin-mocha-grub-theme/"* "$theme_dir/"
+      rm -rf "$tmp_dir"
 
-      cat > /boot/loader/entries/arch-fallback.conf <<EOF
-title   Arch Linux (Fallback)
-linux   /vmlinuz-linux
-${microcode_lines}initrd  /initramfs-linux-fallback.img
-options ${base_opts}
-EOF
+      # Set theme in GRUB config
+      echo "GRUB_THEME=\"${theme_dir}/theme.txt\"" >> /etc/default/grub
 
-      # --- linux-lts entries ---
-      cat > /boot/loader/entries/arch-lts.conf <<EOF
-title   Arch Linux (LTS)
-linux   /vmlinuz-linux-lts
-${microcode_lines}initrd  /initramfs-linux-lts.img
-options ${base_opts} quiet
-EOF
+      # Install GRUB to EFI system partition
+      run_logged "Installing GRUB" grub-install \
+        --target=x86_64-efi \
+        --efi-directory=/boot \
+        --bootloader-id=GRUB
 
-      cat > /boot/loader/entries/arch-lts-fallback.conf <<EOF
-title   Arch Linux (LTS Fallback)
-linux   /vmlinuz-linux-lts
-${microcode_lines}initrd  /initramfs-linux-lts-fallback.img
-options ${base_opts}
-EOF
+      # Generate GRUB configuration (picks up os-prober, theme, resume param)
+      run_logged "Generating GRUB config" grub-mkconfig -o /boot/grub/grub.cfg
 
-      log_info "systemd-boot installed with 4 entries (linux, linux-lts, + fallbacks)."
+      # Set GRUB as first UEFI boot entry (prepend to existing boot order)
+      local grub_entry
+      grub_entry="$(efibootmgr | grep -i "GRUB" | head -1 | grep -oP 'Boot\K[0-9A-Fa-f]+')"
+      if [[ -n "$grub_entry" ]]; then
+        local current_order
+        current_order="$(efibootmgr | grep -oP 'BootOrder: \K.*')"
+        # Remove GRUB from current order, then prepend it
+        local new_order
+        new_order="$(echo "$current_order" | sed "s/${grub_entry},\?//;s/,$//")"
+        if [[ -n "$new_order" ]]; then
+          new_order="${grub_entry},${new_order}"
+        else
+          new_order="$grub_entry"
+        fi
+        run_logged "Setting GRUB as first boot entry" efibootmgr --bootorder "$new_order"
+      fi
+
+      # Clean up stale systemd-boot EFI entry if present
+      local stale_entry
+      stale_entry="$(efibootmgr | grep -i "Linux Boot Manager" | head -1 | grep -oP 'Boot\K[0-9A-Fa-f]+' || true)"
+      if [[ -n "$stale_entry" ]]; then
+        log_info "Removing stale systemd-boot EFI entry (Boot${stale_entry})..."
+        efibootmgr -b "$stale_entry" -B
+      fi
+
+      log_info "GRUB installed with os-prober + Catppuccin Mocha theme."
       ;;
     *)
-      die "Unsupported bootloader: $BOOTLOADER (only systemd-boot is supported)"
+      die "Unsupported bootloader: $BOOTLOADER (only grub is supported)"
       ;;
   esac
 }

@@ -18,7 +18,7 @@ LOCALE="${LOCALE:-en_US.UTF-8}"
 KEYMAP="${KEYMAP:-us}"
 
 # --- Boot ---
-BOOTLOADER="${BOOTLOADER:-systemd-boot}"      # systemd-boot (UEFI only)
+BOOTLOADER="${BOOTLOADER:-grub}"               # grub (UEFI only)
 
 # --- Hardware ---
 GPU_DRIVER="${GPU_DRIVER:-auto}"              # auto | amd | intel | nvidia | none

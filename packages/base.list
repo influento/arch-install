@@ -28,9 +28,12 @@ neovim
 e2fsprogs
 dosfstools
 btrfs-progs
+ntfs-3g
 
 # Boot
+grub
 efibootmgr
+os-prober
 
 # Hardware detection
 pciutils
