@@ -44,7 +44,7 @@
 - [x] Hyper-V VM test setup (configs + README in tests/)
 - [x] Test workstation profile end-to-end in VM (packages, services, dotfiles all verified)
 - [x] Test dotfiles integration in VM (symlinks, zsh, .config/* all correct)
-- [ ] Test on physical hardware (dual-boot with Windows on separate SSD)
+- [x] Test on physical hardware (AMD GPU, dual-boot — system installs and boots, Sway black screen was dotfiles-side)
 - [ ] Test with different disk layouts (single disk, NVMe, multiple disks)
 - [ ] Idempotency checks (re-running scripts doesn't break things)
 - [ ] Error recovery (resume after failure)
