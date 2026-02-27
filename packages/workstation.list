@@ -49,6 +49,7 @@ papirus-icon-theme
 breeze-gtk
 qt6ct
 kvantum
+kvantum-qt5
 
 # Tray icon support (needed for Chrome, JB Toolbox, Dropbox, etc.)
 libappindicator-gtk3

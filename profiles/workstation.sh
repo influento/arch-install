@@ -52,7 +52,9 @@ log_info "Installing AUR packages..."
 sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed \
   google-chrome \
   dropbox \
-  python-gpgme
+  python-gpgme \
+  kvantum-theme-catppuccin-git \
+  catppuccin-gtk-theme-mocha
 
 # Install global npm tools
 log_info "Installing Claude Code..."

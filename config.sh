@@ -11,7 +11,7 @@ SWAP_SIZE="${SWAP_SIZE:-}"                    # auto: RAM size, min 8G
 WIPE_HOME="${WIPE_HOME:-}"                   # yes|no (prompted if empty and existing /home found)
 
 # --- System ---
-HOSTNAME="${HOSTNAME:-}"                      # prompted if empty
+HOSTNAME=""                                   # always prompt (shell sets HOSTNAME automatically)
 USERNAME="${USERNAME:-}"                       # non-root user (prompted if empty)
 TIMEZONE="${TIMEZONE:-UTC}"                   # prompted if still UTC at install time
 LOCALE="${LOCALE:-en_US.UTF-8}"
