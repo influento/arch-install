@@ -45,6 +45,11 @@ check_network() {
   # Unblock WiFi before checking for devices (soft-block can hide interfaces)
   rfkill unblock wifi 2>/dev/null || true
 
+  # If WiFi hardware exists but no interface, try reloading the driver
+  if ! _has_wireless_devices && _has_wifi_hardware; then
+    _recover_wifi_driver
+  fi
+
   # Check for wireless devices and offer WiFi setup
   if _has_wireless_devices && command -v iwctl &>/dev/null; then
     while true; do
@@ -62,7 +67,8 @@ check_network() {
     if ! command -v iwctl &>/dev/null; then
       log_warn "iwctl not available — cannot set up WiFi interactively."
     elif ! _has_wireless_devices; then
-      log_warn "No wireless devices detected. Check 'rfkill list' and 'lspci | grep -i net' from a shell."
+      log_warn "No wireless devices detected."
+      _print_wifi_diagnostics
     fi
   fi
 
@@ -141,6 +147,102 @@ _setup_wifi() {
   else
     iwctl station "$device" connect "$ssid" || true
   fi
+}
+
+_has_wifi_hardware() {
+  # Check if PCI lists any wireless/WiFi hardware (even if driver failed to load)
+  lspci 2>/dev/null | grep -qi 'network controller\|wireless' 2>/dev/null
+}
+
+_recover_wifi_driver() {
+  local _attempt driver
+  driver="iwlwifi"
+
+  # Detect the right driver from PCI device info
+  if lspci -k 2>/dev/null | grep -qi 'ath[0-9]\|qualcomm'; then
+    driver="ath10k_pci"
+  elif lspci -k 2>/dev/null | grep -qi 'broadcom'; then
+    driver="brcmfmac"
+  fi
+
+  log_warn "WiFi hardware found but no interface — attempting driver reload ($driver)..."
+
+  # Attempt 1: simple driver reload (handles soft failures)
+  modprobe -r "$driver" 2>/dev/null || true
+  sleep 1
+  modprobe "$driver" 2>/dev/null || true
+  sleep 3
+
+  if _has_wireless_devices; then
+    log_info "WiFi interface recovered after driver reload."
+    return 0
+  fi
+
+  # Attempt 2: PCI device reset (handles warm-reboot firmware hangs)
+  log_warn "Driver reload failed — attempting PCI device reset..."
+  if _reset_wifi_pci_device "$driver"; then
+    return 0
+  fi
+
+  log_warn "WiFi recovery failed after all attempts."
+  return 1
+}
+
+_reset_wifi_pci_device() {
+  local driver="$1"
+  local pci_addr
+
+  # Find the PCI address of the wireless device
+  pci_addr=$(lspci -D 2>/dev/null | grep -i 'network controller\|wireless' | awk '{print $1}' | head -1)
+  if [[ -z "$pci_addr" ]]; then
+    log_warn "Could not find WiFi PCI address for reset."
+    return 1
+  fi
+
+  log_warn "Resetting PCI device $pci_addr..."
+
+  # Unload the driver first
+  modprobe -r "$driver" 2>/dev/null || true
+  sleep 1
+
+  # Remove the device from the PCI bus (forces hardware teardown)
+  if [[ -e "/sys/bus/pci/devices/$pci_addr/remove" ]]; then
+    echo 1 > "/sys/bus/pci/devices/$pci_addr/remove"
+    sleep 2
+  else
+    log_warn "PCI device sysfs path not found — skipping reset."
+    return 1
+  fi
+
+  # Rescan the PCI bus (re-discovers and reinitializes the device)
+  echo 1 > /sys/bus/pci/rescan
+  sleep 3
+
+  # Load the driver for the freshly initialized hardware
+  modprobe "$driver" 2>/dev/null || true
+  sleep 3
+
+  if _has_wireless_devices; then
+    log_info "WiFi interface recovered after PCI device reset."
+    return 0
+  fi
+
+  log_warn "PCI device reset did not recover WiFi interface."
+  return 1
+}
+
+_print_wifi_diagnostics() {
+  log_warn "--- WiFi diagnostics ---"
+  log_warn "PCI devices:"
+  lspci 2>/dev/null | grep -i 'network controller\|wireless' | while IFS= read -r line; do
+    log_warn "  $line"
+  done
+  log_warn "rfkill status:"
+  rfkill list 2>/dev/null | while IFS= read -r line; do
+    log_warn "  $line"
+  done
+  log_warn "Check 'dmesg | grep -i iwlwifi' from a shell for firmware errors."
+  log_warn "------------------------"
 }
 
 check_disks() {
