@@ -42,6 +42,9 @@ check_network() {
     die "No network connectivity. Ensure network is available before using --auto mode."
   fi
 
+  # Unblock WiFi before checking for devices (soft-block can hide interfaces)
+  rfkill unblock wifi 2>/dev/null || true
+
   # Check for wireless devices and offer WiFi setup
   if _has_wireless_devices && command -v iwctl &>/dev/null; then
     while true; do
@@ -55,6 +58,12 @@ check_network() {
       fi
       log_warn "Still no connectivity after WiFi setup."
     done
+  else
+    if ! command -v iwctl &>/dev/null; then
+      log_warn "iwctl not available — cannot set up WiFi interactively."
+    elif ! _has_wireless_devices; then
+      log_warn "No wireless devices detected. Check 'rfkill list' and 'lspci | grep -i net' from a shell."
+    fi
   fi
 
   die "No network connectivity. Connect via Ethernet or use 'iwctl' to set up WiFi before running the installer."
@@ -81,9 +90,6 @@ _wait_for_network() {
 
 _setup_wifi() {
   local device ssid passphrase
-
-  # Unblock WiFi if soft-blocked
-  rfkill unblock wifi 2>/dev/null || true
 
   # Find wireless devices
   local devices=()
