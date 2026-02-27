@@ -36,6 +36,9 @@ brightnessctl
 # Authentication agent (needed for privilege escalation prompts in Sway)
 polkit-gnome
 
+# Network Manager tray icon (WiFi GUI in Sway)
+network-manager-applet
+
 # Bluetooth
 bluez
 bluez-utils

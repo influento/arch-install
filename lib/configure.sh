@@ -123,8 +123,33 @@ configure_bootloader() {
         --efi-directory=/boot \
         --bootloader-id=GRUB
 
+      # Mount other EFI System Partitions so os-prober can detect Windows.
+      # os-prober does NOT auto-mount partitions inside a chroot, so we must
+      # make other ESPs (e.g. Windows on a second SSD) visible manually.
+      local mounted_esps=()
+      while IFS= read -r esp_dev; do
+        [[ -z "$esp_dev" ]] && continue
+        # Skip if already mounted (our own /boot ESP)
+        if findmnt -n "$esp_dev" > /dev/null 2>&1; then
+          continue
+        fi
+        local mnt
+        mnt="/run/os-prober-esps/$(basename "$esp_dev")"
+        mkdir -p "$mnt"
+        if mount -r "$esp_dev" "$mnt" 2>/dev/null; then
+          mounted_esps+=("$mnt")
+          log_info "Mounted $esp_dev at $mnt for os-prober"
+        fi
+      done < <(lsblk -rno PATH,PARTTYPE | awk '$2 == "c12a7328-f81f-11d2-ba4b-00a0c93ec93b" {print $1}')
+
       # Generate GRUB configuration (picks up os-prober, theme, resume param)
       run_logged "Generating GRUB config" grub-mkconfig -o /boot/grub/grub.cfg
+
+      # Clean up temporary ESP mounts
+      for mnt in "${mounted_esps[@]}"; do
+        umount "$mnt" 2>/dev/null || true
+      done
+      rm -rf /run/os-prober-esps
 
       # Set GRUB as first UEFI boot entry (prepend to existing boot order)
       local grub_entry
