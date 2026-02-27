@@ -160,6 +160,11 @@ apply_live_keymap() {
 }
 
 refresh_keyring() {
+  # Initialize keyring if missing or corrupted (common on older/custom ISOs)
+  if ! pacman-key --list-keys &>/dev/null; then
+    run_logged "Initializing pacman keyring" pacman-key --init
+    run_logged "Populating Arch Linux keys" pacman-key --populate archlinux
+  fi
   # Refresh pacman keyring — stale keys on older ISOs cause signature failures
   run_logged "Refreshing pacman keyring" pacman -Sy --noconfirm archlinux-keyring
 }

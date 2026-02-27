@@ -67,6 +67,8 @@ setup_disk() {
 
   partition_workstation "$(part_prefix "$TARGET_DISK")"
   run_logged "Reloading partition table" partprobe "$TARGET_DISK"
+  # Wait for kernel to finish creating device nodes (NVMe can be slow)
+  run_logged "Waiting for device nodes" udevadm settle
   log_info "Partitions: EFI=$PART_EFI SWAP=$PART_SWAP ROOT=$PART_ROOT HOME=${PART_HOME:-n/a}"
 
   format_partitions

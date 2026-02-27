@@ -106,13 +106,15 @@ console-mode max
 editor  no
 EOF
 
-      # Determine microcode initrd line
-      local microcode_line=""
+      # Determine microcode initrd lines.
+      # Both amd-ucode and intel-ucode are installed; include whichever exist.
+      # systemd-boot loads only the matching CPU's microcode and ignores the other.
+      local microcode_lines=""
       if [[ -f /boot/amd-ucode.img ]]; then
-        microcode_line="initrd  /amd-ucode.img"
+        microcode_lines+="initrd  /amd-ucode.img"$'\n'
       fi
       if [[ -f /boot/intel-ucode.img ]]; then
-        microcode_line="initrd  /intel-ucode.img"
+        microcode_lines+="initrd  /intel-ucode.img"$'\n'
       fi
 
       # Build kernel options
@@ -129,16 +131,14 @@ EOF
       cat > /boot/loader/entries/arch.conf <<EOF
 title   Arch Linux
 linux   /vmlinuz-linux
-${microcode_line}
-initrd  /initramfs-linux.img
+${microcode_lines}initrd  /initramfs-linux.img
 options ${base_opts} quiet
 EOF
 
       cat > /boot/loader/entries/arch-fallback.conf <<EOF
 title   Arch Linux (Fallback)
 linux   /vmlinuz-linux
-${microcode_line}
-initrd  /initramfs-linux-fallback.img
+${microcode_lines}initrd  /initramfs-linux-fallback.img
 options ${base_opts}
 EOF
 
@@ -146,16 +146,14 @@ EOF
       cat > /boot/loader/entries/arch-lts.conf <<EOF
 title   Arch Linux (LTS)
 linux   /vmlinuz-linux-lts
-${microcode_line}
-initrd  /initramfs-linux-lts.img
+${microcode_lines}initrd  /initramfs-linux-lts.img
 options ${base_opts} quiet
 EOF
 
       cat > /boot/loader/entries/arch-lts-fallback.conf <<EOF
 title   Arch Linux (LTS Fallback)
 linux   /vmlinuz-linux-lts
-${microcode_line}
-initrd  /initramfs-linux-lts-fallback.img
+${microcode_lines}initrd  /initramfs-linux-lts-fallback.img
 options ${base_opts}
 EOF
 
