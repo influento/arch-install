@@ -104,6 +104,45 @@ select_option() {
   done
 }
 
+# Print partition details and OS detection for a disk.
+# Used by select_disk to show context under each disk entry.
+_print_disk_details() {
+  local disk="$1"
+  local parts=()
+  local has_ntfs=0
+  local has_linux_fs=0
+
+  while IFS= read -r line; do
+    # Parse KEY="VALUE" pairs from lsblk -P output
+    local type fstype size
+    type="${line#*TYPE=\"}"; type="${type%%\"*}"
+    [[ "$type" != "part" ]] && continue
+    fstype="${line#*FSTYPE=\"}"; fstype="${fstype%%\"*}"
+    size="${line#*SIZE=\"}"; size="${size%%\"*}"
+
+    [[ -z "$fstype" ]] && fstype="raw"
+    parts+=("${fstype}(${size})")
+
+    case "$fstype" in
+      ntfs) has_ntfs=1 ;;
+      ext4|btrfs|xfs) has_linux_fs=1 ;;
+    esac
+  done < <(lsblk -Pno TYPE,FSTYPE,SIZE "$disk" 2>/dev/null)
+
+  if [[ ${#parts[@]} -eq 0 ]]; then
+    printf '      %bEmpty (no partitions)%b\n' "$_CLR_DIM" "$_CLR_RESET" >&2
+  else
+    local summary="${parts[*]}"
+    if [[ $has_ntfs -eq 1 ]]; then
+      printf '      %b%s%b  %bWindows detected%b\n' "$_CLR_DIM" "$summary" "$_CLR_RESET" "$_CLR_YELLOW" "$_CLR_RESET" >&2
+    elif [[ $has_linux_fs -eq 1 ]]; then
+      printf '      %b%s%b  %bLinux detected%b\n' "$_CLR_DIM" "$summary" "$_CLR_RESET" "$_CLR_YELLOW" "$_CLR_RESET" >&2
+    else
+      printf '      %b%s%b\n' "$_CLR_DIM" "$summary" "$_CLR_RESET" >&2
+    fi
+  fi
+}
+
 # Select a disk from available block devices.
 # Usage: result=$(select_disk)
 select_disk() {
@@ -118,9 +157,11 @@ select_disk() {
   fi
 
   printf '\n%b:: %bAvailable disks:\n' "$_CLR_CYAN" "$_CLR_RESET" >&2
-  local i
+  local i dev
   for i in "${!disks[@]}"; do
     printf '   %b%d)%b %s\n' "$_CLR_BOLD" "$((i + 1))" "$_CLR_RESET" "${disks[$i]}" >&2
+    dev="$(echo "${disks[$i]}" | awk '{print $1}')"
+    _print_disk_details "$dev"
   done
 
   local choice
@@ -129,8 +170,6 @@ select_disk() {
     read -r choice
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#disks[@]} )); then
       local selected="${disks[$((choice - 1))]}"
-      # Extract device path (first field)
-      local dev
       dev="$(echo "$selected" | awk '{print $1}')"
       printf '%s' "$dev"
       return 0
