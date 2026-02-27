@@ -73,6 +73,10 @@ code
 # VPN
 wireguard-tools
 
+# Git + GitHub
+openssh
+github-cli
+
 # Communication
 telegram-desktop
 discord
