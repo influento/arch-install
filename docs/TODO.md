@@ -27,7 +27,6 @@
 - [ ] Starship prompt configuration
 - [ ] Zsh / oh-my-zsh configuration (.zshrc, plugins)
 - [ ] GTK/Qt theme configuration
-- [ ] SDDM theme
 
 ## Phase 4: Interactive Feature Selection
 

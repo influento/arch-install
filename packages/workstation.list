@@ -15,11 +15,6 @@ swaybg
 # Launcher
 wofi
 
-# Display manager
-sddm
-qt6-svg
-qt6-declarative
-
 # Terminal
 ghostty
 

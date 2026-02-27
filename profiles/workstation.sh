@@ -21,7 +21,6 @@ install_packages_from_list \
 
 # Run hardware/system modules
 source "${INSTALLER_DIR}/modules/gpu.sh"
-source "${INSTALLER_DIR}/modules/sddm.sh"
 source "${INSTALLER_DIR}/modules/firewall.sh"
 source "${INSTALLER_DIR}/modules/ssh.sh"
 source "${INSTALLER_DIR}/modules/virtualization.sh"
@@ -60,8 +59,16 @@ log_info "Installing Claude Code..."
 npm install -g @anthropic-ai/claude-code
 
 # Enable workstation services
+# TTY1 autologin for the created user (Sway auto-launches from .zshrc)
+log_info "Configuring TTY1 autologin for ${USERNAME}..."
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<AUTOLOGIN
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin ${USERNAME} --noclear %I \$TERM
+AUTOLOGIN
+
 enable_services \
-  sddm \
   bluetooth \
   docker
 

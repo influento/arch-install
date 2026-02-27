@@ -61,7 +61,6 @@ Start-VM -Name "ArchTest"
 ### 4. What to Verify After Install
 
 **Services:**
-- [ ] `systemctl status sddm` — enabled, running
 - [ ] `systemctl status bluetooth` — enabled (inactive without hardware)
 - [ ] `systemctl status docker` — active (running)
 - [ ] `systemctl status libvirtd` — enabled
@@ -85,8 +84,8 @@ Start-VM -Name "ArchTest"
 - [ ] Dotfiles deployed: `ls -la ~/.dotfiles`
 
 **GUI (requires display — skip in TTY):**
-- [ ] SDDM login screen appears
-- [ ] Sway session starts after login
+- [ ] TTY1 autologin works (user is logged in automatically)
+- [ ] Sway starts automatically on login
 - [ ] Ghostty terminal opens
 - [ ] KeePassXC, OBS, GIMP, LibreOffice launch
 

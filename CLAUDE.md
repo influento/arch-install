@@ -41,7 +41,7 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 - `lib/` — shared utilities (logging, disk ops, checks, chroot wrapper, UI prompts)
 - `profiles/workstation.sh` — workstation profile orchestrator
 - `profiles/base.sh` — base setup: AUR helper (yay) + dotfiles deployment
-- `modules/` — feature scripts (gpu, sddm, firewall, ssh, virtualization)
+- `modules/` — feature scripts (gpu, firewall, ssh, virtualization)
 - `packages/` — plain-text package lists, one package per line, `#` for comments
 - `iso/` — custom ISO build system (Dockerfile + archiso overlay + build script)
 - `tests/` — VM test configs, ISO download, VM creation scripts, and testing guide
