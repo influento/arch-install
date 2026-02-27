@@ -51,10 +51,9 @@ install_gpu_driver() {
         vulkan-radeon \
         lib32-vulkan-radeon \
         libva-mesa-driver \
-        lib32-libva-mesa-driver \
-        mesa-vdpau \
-        lib32-mesa-vdpau
+        lib32-libva-mesa-driver
       # AMD uses open-source drivers in the kernel — no DKMS needed
+      # VDPAU removed from Mesa in favor of VA-API (mesa 25.x+)
 
       log_info "AMD drivers installed (mesa + Vulkan + VA-API)."
       ;;

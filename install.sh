@@ -84,6 +84,49 @@ log_info "Log file: $LOG_FILE"
 
 run_preflight_checks
 
+# --- Detect geo location (timezone default + mirror country) ---
+
+_GEO_TIMEZONE=""
+_GEO_COUNTRY=""
+
+if [[ "$TIMEZONE" == "UTC" || -z "$MIRROR_COUNTRY" ]]; then
+  log_info "Detecting location..."
+  _geo_json="$(curl -sf --max-time 5 "https://ipapi.co/json/" 2>/dev/null)" || _geo_json=""
+
+  # Fallback to ip-api.com
+  if [[ -z "$_geo_json" ]]; then
+    _geo_json="$(curl -sf --max-time 5 "http://ip-api.com/json/?fields=countryCode,timezone" 2>/dev/null)" || _geo_json=""
+  fi
+
+  if [[ -n "$_geo_json" ]]; then
+    # ipapi.co uses "country_code", ip-api.com uses "countryCode" — try both
+    _GEO_COUNTRY="$(printf '%s' "$_geo_json" | sed -n 's/.*"country_code": *"\([^"]*\)".*/\1/p')"
+    [[ -z "$_GEO_COUNTRY" ]] && _GEO_COUNTRY="$(printf '%s' "$_geo_json" | sed -n 's/.*"countryCode": *"\([^"]*\)".*/\1/p')"
+    _GEO_TIMEZONE="$(printf '%s' "$_geo_json" | sed -n 's/.*"timezone": *"\([^"]*\)".*/\1/p')"
+  fi
+
+  # Validate country code (exactly 2 uppercase letters)
+  if [[ ! "$_GEO_COUNTRY" =~ ^[A-Z]{2}$ ]]; then
+    _GEO_COUNTRY=""
+  fi
+
+  # Validate timezone (must exist in zoneinfo)
+  if [[ -n "$_GEO_TIMEZONE" && ! -f "/usr/share/zoneinfo/${_GEO_TIMEZONE}" ]]; then
+    _GEO_TIMEZONE=""
+  fi
+
+  if [[ -n "$_GEO_COUNTRY" || -n "$_GEO_TIMEZONE" ]]; then
+    log_info "Detected: country=${_GEO_COUNTRY:-unknown}, timezone=${_GEO_TIMEZONE:-unknown}"
+  else
+    log_warn "Could not detect location."
+  fi
+
+  # Set mirror country if not already configured
+  if [[ -z "$MIRROR_COUNTRY" && -n "$_GEO_COUNTRY" ]]; then
+    MIRROR_COUNTRY="$_GEO_COUNTRY"
+  fi
+fi
+
 # --- Gather configuration interactively ---
 
 log_section "Configuration"
@@ -108,9 +151,10 @@ if [[ -z "$HOSTNAME" ]]; then
 fi
 log_info "Hostname: $HOSTNAME"
 
-# Timezone — prompt if still default UTC
+# Timezone — prompt if still default UTC, suggest detected timezone
 if [[ "$TIMEZONE" == "UTC" ]]; then
-  entered_tz=$(prompt_input "Enter timezone (e.g. America/New_York)" "UTC")
+  _tz_default="${_GEO_TIMEZONE:-UTC}"
+  entered_tz=$(prompt_input "Enter timezone (e.g. America/New_York)" "$_tz_default")
   TIMEZONE="$entered_tz"
 fi
 log_info "Timezone: $TIMEZONE"

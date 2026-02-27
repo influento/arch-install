@@ -12,6 +12,27 @@ setup_mirrors() {
       --save /etc/pacman.d/mirrorlist
     )
 
+    # Country is normally detected early in install.sh via geo IP.
+    # Fallback: try plain-text endpoints if MIRROR_COUNTRY is still empty.
+    if [[ -z "$MIRROR_COUNTRY" ]]; then
+      local detected_country=""
+      local geo_urls=(
+        "https://ipapi.co/country_code"
+        "https://ifconfig.io/country_code"
+        "http://ip-api.com/line/?fields=countryCode"
+      )
+      for geo_url in "${geo_urls[@]}"; do
+        detected_country="$(curl -sf --max-time 5 "$geo_url" | tr -d '[:space:]')"
+        if [[ "$detected_country" =~ ^[A-Z]{2}$ ]]; then
+          MIRROR_COUNTRY="$detected_country"
+          log_info "Auto-detected mirror country: $MIRROR_COUNTRY"
+          break
+        fi
+        detected_country=""
+      done
+      [[ -z "$MIRROR_COUNTRY" ]] && log_warn "Could not detect country, using worldwide mirrors."
+    fi
+
     if [[ -n "$MIRROR_COUNTRY" ]]; then
       reflector_args+=(--country "$MIRROR_COUNTRY")
       log_info "Filtering mirrors by country: $MIRROR_COUNTRY"

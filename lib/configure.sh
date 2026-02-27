@@ -27,7 +27,7 @@ configure_pacman() {
   # Enable multilib repository (needed for 32-bit libs: Steam, Wine, some drivers)
   log_info "Enabling multilib repository..."
   # Uncomment the [multilib] section (header + Include line)
-  sed -i '/^\[multilib\]$/,/^Include/ s/^#//' /etc/pacman.conf
+  sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
 
   # Sync package database with new config
   run_logged "Syncing package databases" pacman -Syy
