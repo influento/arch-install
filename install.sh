@@ -281,11 +281,8 @@ log_info "Log saved to: ${MOUNT_POINT}${LOG_FILE}"
 # Copy log into the installed system
 cp "$LOG_FILE" "${MOUNT_POINT}${LOG_FILE}" 2>/dev/null || true
 
-if confirm "Reboot now?"; then
-  swapoff -a 2>/dev/null || true
-  umount -R "$MOUNT_POINT" 2>/dev/null || true
-  reboot
-else
-  log_info "You can reboot manually when ready."
-  log_info "Don't forget to: umount -R ${MOUNT_POINT} && reboot"
-fi
+log_info "Rebooting in 5 seconds... (Ctrl+C to cancel)"
+sleep 5
+swapoff -a 2>/dev/null || true
+umount -R "$MOUNT_POINT" 2>/dev/null || true
+reboot

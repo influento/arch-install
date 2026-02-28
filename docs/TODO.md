@@ -14,24 +14,21 @@
 - **Claude Code**: installed via npm globally
 - **Phase 3**: Configuration deployment (dotfiles integration complete, user configs in dotfiles repo)
 
-## Phase 4: Interactive Feature Selection
-
-- [ ] Simple TUI menu using `gum` or `dialog` for optional features
-- [ ] Feature flags system (enable/disable features via config or menu)
-
-## Phase 5: Testing and Hardening
+## Testing
 
 - [x] ShellCheck all scripts (clean as of current session)
 - [x] Hyper-V VM test setup (configs + README in tests/)
 - [x] Test workstation profile end-to-end in VM (packages, services, dotfiles all verified)
 - [x] Test dotfiles integration in VM (symlinks, zsh, .config/* all correct)
 - [x] Test on physical hardware (AMD GPU, dual-boot — system installs and boots, Sway black screen was dotfiles-side)
-- [ ] Test with different disk layouts (single disk, NVMe, multiple disks)
-- [ ] Idempotency checks (re-running scripts doesn't break things)
-- [ ] Error recovery (resume after failure)
 
 ## Future Ideas (Backlog)
 
+- [ ] Interactive feature selection (TUI menu with `gum` or `dialog`)
+- [ ] Feature flags system (enable/disable features via config or menu)
+- [ ] Test with different disk layouts (single disk, NVMe, multiple disks)
+- [ ] Idempotency checks (re-running scripts doesn't break things)
+- [ ] Error recovery (resume after failure)
 - [ ] Optional module: Gaming (Steam, Lutris, gamemode, mangohud)
 - [ ] Optional module: Remote desktop (remmina, freerdp)
 - [ ] Optional module: Container orchestration (k3s, podman)
