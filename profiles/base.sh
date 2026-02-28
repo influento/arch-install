@@ -7,6 +7,7 @@ run_base_profile() {
 
   install_aur_helper
   deploy_dotfiles
+  clone_infra_repos
 
   log_info "Base profile setup complete."
 }
@@ -44,7 +45,7 @@ install_aur_helper() {
   fi
 }
 
-# Deploy the dotfiles repository to the user's home directory.
+# Deploy the dotfiles repository to ~/dev/infra/dotfiles.
 # Checks for a pre-cloned cache (from custom ISO) before attempting a network clone.
 # After deployment, runs the dotfiles installer if it exists.
 deploy_dotfiles() {
@@ -54,8 +55,13 @@ deploy_dotfiles() {
     return 0
   fi
 
-  local dest="${DOTFILES_DEST:-/home/${USERNAME}/.dotfiles}"
+  local infra_dir="/home/${USERNAME}/dev/infra"
+  local dest="${DOTFILES_DEST:-${infra_dir}/dotfiles}"
   local cache_dir="${INSTALLER_DIR}/.dotfiles-cache"
+
+  # Ensure parent directories exist
+  mkdir -p "$(dirname "$dest")"
+  chown "${USERNAME}:${USERNAME}" "/home/${USERNAME}/dev" "$infra_dir"
 
   if [[ -d "$dest" ]]; then
     log_info "Dotfiles already present at $dest, pulling latest..."
@@ -80,4 +86,27 @@ deploy_dotfiles() {
     log_warn "No install.sh found in dotfiles repo — skipping dotfiles installer."
     log_info "Dotfiles repo is available at $dest for manual setup."
   fi
+}
+
+# Clone arch-install and debian-server repos into ~/dev/infra/.
+# Skips repos that are already cloned or have no URL configured.
+clone_infra_repos() {
+  local infra_dir="/home/${USERNAME}/dev/infra"
+
+  local repo url dest
+  for repo in ARCH_INSTALL_REPO SERVER_INSTALL_REPO; do
+    url="${!repo:-}"
+    [[ -z "$url" ]] && continue
+
+    # Derive directory name from repo URL (e.g. arch-install.git → arch-install)
+    dest="${infra_dir}/$(basename "$url" .git)"
+
+    if [[ -d "$dest" ]]; then
+      log_info "$(basename "$dest") already present, pulling latest..."
+      sudo -u "$USERNAME" git -C "$dest" pull --ff-only || log_warn "Pull failed for $(basename "$dest"), using existing."
+    else
+      log_info "Cloning $(basename "$dest") from $url..."
+      sudo -u "$USERNAME" git clone "$url" "$dest"
+    fi
+  done
 }

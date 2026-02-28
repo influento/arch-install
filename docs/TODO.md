@@ -12,30 +12,12 @@
 - **Clipboard history**: cliphist (Wayland-native)
 - **Blue light filter**: wlsunset (Wayland-native)
 - **Claude Code**: installed via npm globally
-
-## Phase 3: Configuration Deployment (via Dotfiles Repo)
-
-- [x] Set `DOTFILES_REPO` in config and test dotfiles integration end-to-end
-- [x] Custom ISO pre-clones dotfiles for offline install
-- [x] Dotfiles deployed and verified in VM (symlinks, zsh, all configs correct)
-- [ ] Sway configuration (keybindings, appearance, monitors, workspace layout)
-- [ ] Waybar configuration
-- [ ] Terminal configuration (Ghostty)
-- [ ] Neovim base configuration
-- [ ] tmux configuration
-- [ ] Git global configuration template
-- [ ] Starship prompt configuration
-- [ ] Zsh / oh-my-zsh configuration (.zshrc, plugins)
-- [ ] GTK/Qt theme configuration
+- **Phase 3**: Configuration deployment (dotfiles integration complete, user configs in dotfiles repo)
 
 ## Phase 4: Interactive Feature Selection
 
 - [ ] Simple TUI menu using `gum` or `dialog` for optional features
 - [ ] Feature flags system (enable/disable features via config or menu)
-- [ ] Optional feature modules:
-  - [ ] Gaming (Steam, Lutris, gamemode, mangohud)
-  - [ ] Remote desktop (remmina, freerdp)
-  - [ ] Container orchestration (k3s, podman)
 
 ## Phase 5: Testing and Hardening
 
@@ -50,6 +32,9 @@
 
 ## Future Ideas (Backlog)
 
+- [ ] Optional module: Gaming (Steam, Lutris, gamemode, mangohud)
+- [ ] Optional module: Remote desktop (remmina, freerdp)
+- [ ] Optional module: Container orchestration (k3s, podman)
 - [ ] Encryption support (LUKS)
 - [ ] Btrfs snapshots with Snapper
 - [ ] Secure Boot support

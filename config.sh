@@ -27,9 +27,11 @@ GPU_DRIVER="${GPU_DRIVER:-auto}"              # auto | amd | intel | nvidia | no
 EDITOR="${EDITOR:-nvim}"                      # default editor for visudo, git, etc.
 AUR_HELPER="${AUR_HELPER:-yay}"               # yay | paru
 
-# --- Dotfiles ---
+# --- Repos (cloned to ~/dev/infra/) ---
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/influento/dotfiles.git}"
-DOTFILES_DEST="${DOTFILES_DEST:-}"            # clone target (auto-set to /home/$USERNAME/.dotfiles)
+DOTFILES_DEST="${DOTFILES_DEST:-}"            # clone target (auto-set to /home/$USERNAME/dev/infra/dotfiles)
+ARCH_INSTALL_REPO="${ARCH_INSTALL_REPO:-https://github.com/influento/arch-install.git}"
+SERVER_INSTALL_REPO="${SERVER_INSTALL_REPO:-https://github.com/influento/debian-server.git}"
 
 # --- Mirrors ---
 MIRROR_COUNTRY="${MIRROR_COUNTRY:-}"          # reflector country filter (e.g. "US" or "US,DE")

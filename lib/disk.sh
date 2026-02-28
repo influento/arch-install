@@ -26,44 +26,10 @@ part_prefix() {
 setup_disk() {
   log_section "Disk Setup"
 
-  # Select disk if not set
-  if [[ -z "$TARGET_DISK" ]]; then
-    TARGET_DISK=$(select_disk)
-  fi
   log_info "Target disk: $TARGET_DISK"
-
-  # Compute swap size (RAM-based, min 8G)
-  if [[ -z "$SWAP_SIZE" ]]; then
-    SWAP_SIZE=$(detect_swap_size)
-    log_info "Swap size (auto, RAM-based): $SWAP_SIZE"
-  fi
-
-  # Root size default: 128G
-  if [[ -z "$ROOT_SIZE" ]]; then
-    ROOT_SIZE="128G"
-  fi
-
-  # Check for existing /home and ask about wipe
-  local prefix
-  prefix=$(part_prefix "$TARGET_DISK")
-  if [[ -b "${prefix}4" && -z "$WIPE_HOME" ]]; then
-    log_warn "Existing partition detected at ${prefix}4 (possibly /home)."
-    if confirm "Wipe /home partition? (No = keep existing data, reformat only EFI+swap+root)"; then
-      WIPE_HOME="yes"
-    else
-      WIPE_HOME="no"
-    fi
-  else
-    WIPE_HOME="${WIPE_HOME:-yes}"
-  fi
-
-  # Safety confirmation
-  if [[ "$WIPE_HOME" == "no" ]]; then
-    log_warn "Will WIPE EFI + swap + root on $TARGET_DISK but KEEP /home."
-  else
-    log_warn "ALL DATA ON $TARGET_DISK WILL BE DESTROYED."
-  fi
-  confirm "Proceed with partitioning $TARGET_DISK?" || die "Aborted by user."
+  log_info "Swap size: $SWAP_SIZE"
+  log_info "Root size: $ROOT_SIZE"
+  log_info "Wipe /home: $WIPE_HOME"
 
   partition_workstation "$(part_prefix "$TARGET_DISK")"
   run_logged "Reloading partition table" partprobe "$TARGET_DISK"

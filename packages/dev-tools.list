@@ -1,11 +1,9 @@
 # packages/dev-tools.list — Developer CLI tooling
 
-# Editors
-neovim
+# Editors (neovim is in base.list)
 tmux
 
-# Git
-git
+# Git (git is in base.list)
 lazygit
 
 # Docker

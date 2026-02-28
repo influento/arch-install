@@ -28,6 +28,16 @@ run_in_chroot() {
     done
   fi
 
+  # Write passwords to a separate file with proper escaping.
+  # Passwords can contain shell metacharacters ($, ", \, backticks) that would
+  # be re-interpreted if embedded directly in the heredoc wrapper script.
+  local env_file="${MOUNT_POINT}${chroot_installer}/.chroot-env"
+  {
+    printf 'export ROOT_PASSWORD=%q\n' "${ROOT_PASSWORD:-}"
+    printf 'export USER_PASSWORD=%q\n' "${USER_PASSWORD:-}"
+  } > "$env_file"
+  chmod 600 "$env_file"
+
   # Build the wrapper that sources everything and runs the target script
   local wrapper
   wrapper=$(cat <<CHROOT_EOF
@@ -50,6 +60,8 @@ export EDITOR="${EDITOR}"
 export AUR_HELPER="${AUR_HELPER}"
 export DOTFILES_REPO="${DOTFILES_REPO:-}"
 export DOTFILES_DEST="${DOTFILES_DEST:-}"
+export ARCH_INSTALL_REPO="${ARCH_INSTALL_REPO:-}"
+export SERVER_INSTALL_REPO="${SERVER_INSTALL_REPO:-}"
 export MOUNT_POINT=""
 export PART_EFI="${PART_EFI:-}"
 export PART_SWAP="${PART_SWAP:-}"
@@ -60,8 +72,9 @@ export ROOT_SIZE="${ROOT_SIZE:-}"
 export SWAP_UUID="${SWAP_UUID:-}"
 export DEBUG="${DEBUG:-0}"
 export AUTO_MODE="${AUTO_MODE:-0}"
-export ROOT_PASSWORD="${ROOT_PASSWORD:-}"
-export USER_PASSWORD="${USER_PASSWORD:-}"
+
+# Source passwords (escaped separately to handle shell metacharacters)
+source "\${INSTALLER_DIR}/.chroot-env"
 
 # Source libraries
 source "\${INSTALLER_DIR}/lib/log.sh"
@@ -91,6 +104,12 @@ CHROOT_EOF
 cleanup_chroot() {
   local chroot_installer="${MOUNT_POINT}/root/arch-install"
   if [[ -d "$chroot_installer" ]]; then
+    # Ensure password file is removed (should already be gone with rm -rf,
+    # but explicitly shred it first for defense in depth)
+    local env_file="${chroot_installer}/.chroot-env"
+    if [[ -f "$env_file" ]]; then
+      shred -u "$env_file" 2>/dev/null || rm -f "$env_file"
+    fi
     log_debug "Cleaning up installer copy from chroot"
     rm -rf "$chroot_installer"
   fi

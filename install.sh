@@ -154,8 +154,11 @@ log_info "Hostname: $HOSTNAME"
 # Timezone — prompt if still default UTC, suggest detected timezone
 if [[ "$TIMEZONE" == "UTC" ]]; then
   _tz_default="${_GEO_TIMEZONE:-UTC}"
-  entered_tz=$(prompt_input "Enter timezone (e.g. America/New_York)" "$_tz_default")
-  TIMEZONE="$entered_tz"
+  TIMEZONE=$(prompt_input "Enter timezone (e.g. America/New_York)" "$_tz_default")
+  while [[ ! -f "/usr/share/zoneinfo/${TIMEZONE}" ]]; do
+    log_warn "Invalid timezone: $TIMEZONE"
+    TIMEZONE=$(prompt_input "Enter timezone (e.g. America/New_York)" "$_tz_default")
+  done
 fi
 log_info "Timezone: $TIMEZONE"
 
@@ -170,10 +173,36 @@ else
 fi
 export ROOT_PASSWORD USER_PASSWORD
 
-# Disk selection (interactive if not set)
-# Handled inside setup_disk, but show what we have
-if [[ -n "$TARGET_DISK" ]]; then
-  log_info "Target disk (from CLI): $TARGET_DISK"
+# Disk selection
+if [[ -z "$TARGET_DISK" ]]; then
+  TARGET_DISK=$(select_disk)
+fi
+log_info "Target disk: $TARGET_DISK"
+
+# Swap size (RAM-based, min 8G)
+if [[ -z "$SWAP_SIZE" ]]; then
+  SWAP_SIZE=$(detect_swap_size)
+fi
+log_info "Swap size: $SWAP_SIZE"
+
+# Root size default: 128G
+if [[ -z "$ROOT_SIZE" ]]; then
+  ROOT_SIZE="128G"
+fi
+
+# Check for existing /home and ask about wipe
+if [[ -z "$WIPE_HOME" ]]; then
+  _prefix=$(part_prefix "$TARGET_DISK")
+  if [[ -b "${_prefix}4" ]]; then
+    log_warn "Existing partition detected at ${_prefix}4 (possibly /home)."
+    if confirm "Wipe /home partition? (No = keep existing data, reformat only EFI+swap+root)"; then
+      WIPE_HOME="yes"
+    else
+      WIPE_HOME="no"
+    fi
+  else
+    WIPE_HOME="yes"
+  fi
 fi
 
 # --- Show summary and confirm ---
@@ -185,11 +214,12 @@ print_summary \
   "Locale=$LOCALE" \
   "Keymap=$KEYMAP" \
   "Filesystem=$FS_TYPE" \
-  "Swap=${SWAP_SIZE:-<auto>}" \
-  "Root size=${ROOT_SIZE:-<remaining>}" \
+  "Swap=$SWAP_SIZE" \
+  "Root size=$ROOT_SIZE" \
   "Kernels=linux + linux-lts" \
   "Bootloader=$BOOTLOADER" \
-  "Disk=${TARGET_DISK:-<will be selected>}"
+  "Disk=$TARGET_DISK" \
+  "Wipe /home=$WIPE_HOME"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log_info "Dry run — exiting before making changes."

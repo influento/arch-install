@@ -62,6 +62,6 @@ bootstrap_base_system() {
   pacstrap_packages "${INSTALLER_DIR}/packages/base.list"
 
   log_info "Generating fstab..."
-  genfstab -U "$MOUNT_POINT" >> "${MOUNT_POINT}/etc/fstab"
+  genfstab -U "$MOUNT_POINT" > "${MOUNT_POINT}/etc/fstab"
   log_info "fstab generated."
 }

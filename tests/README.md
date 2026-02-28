@@ -81,7 +81,8 @@ Start-VM -Name "ArchTest"
 - [ ] `groups $USER` shows: wheel docker libvirt
 - [ ] `echo $SHELL` shows: /usr/bin/zsh
 - [ ] `ls /etc/sudoers.d/` shows `00-editor` and `10-nopasswd` (temp file cleaned up)
-- [ ] Dotfiles deployed: `ls -la ~/.dotfiles`
+- [ ] Dotfiles deployed: `ls ~/dev/infra/dotfiles`
+- [ ] Infra repos cloned: `ls ~/dev/infra/` shows dotfiles, arch-install, debian-server
 
 **GUI (requires display — skip in TTY):**
 - [ ] TTY1 autologin works (user is logged in automatically)

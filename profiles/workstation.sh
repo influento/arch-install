@@ -2,11 +2,6 @@
 # profiles/workstation.sh — Workstation profile orchestrator
 # Sway/Wayland workstation with dev tools. Runs inside chroot.
 
-# Temporary passwordless sudo for install-time operations (AUR builds, dotfiles, etc.)
-# Removed at the end of this script.
-echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/99-installer-temp
-chmod 440 /etc/sudoers.d/99-installer-temp
-
 source "${INSTALLER_DIR}/profiles/base.sh"
 run_base_profile
 
@@ -73,8 +68,5 @@ AUTOLOGIN
 enable_services \
   bluetooth \
   docker
-
-# Remove temporary passwordless sudo
-rm -f /etc/sudoers.d/99-installer-temp
 
 log_info "Workstation profile complete."
