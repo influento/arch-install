@@ -80,7 +80,7 @@ Start-VM -Name "ArchTest"
 **System:**
 - [ ] `groups $USER` shows: wheel docker libvirt
 - [ ] `echo $SHELL` shows: /usr/bin/zsh
-- [ ] `ls /etc/sudoers.d/` shows only `00-editor` (temp file cleaned up)
+- [ ] `ls /etc/sudoers.d/` shows `00-editor` and `10-nopasswd` (temp file cleaned up)
 - [ ] Dotfiles deployed: `ls -la ~/.dotfiles`
 
 **GUI (requires display — skip in TTY):**

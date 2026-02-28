@@ -214,4 +214,8 @@ configure_sudo() {
   # Set default editor for visudo
   echo "Defaults editor=/usr/bin/${EDITOR}" > /etc/sudoers.d/00-editor
   chmod 440 /etc/sudoers.d/00-editor
+
+  # Passwordless sudo for the primary user
+  echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-nopasswd
+  chmod 440 /etc/sudoers.d/10-nopasswd
 }
