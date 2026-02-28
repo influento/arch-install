@@ -21,6 +21,10 @@ ghostty
 # File manager (TUI)
 yazi
 
+# Notifications
+mako
+libnotify
+
 # Screenshot / clipboard
 grim
 slurp
