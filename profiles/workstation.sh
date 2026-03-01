@@ -39,6 +39,14 @@ if ! grep -q 'QT_QPA_PLATFORMTHEME=' /etc/environment 2>/dev/null; then
   echo "QT_QPA_PLATFORMTHEME=qt6ct" >> /etc/environment
 fi
 
+# Set XDG_CURRENT_DESKTOP for D-Bus/systemd activation environment
+# Display managers set this automatically; TTY login does not.
+# Without it, D-Bus-activated Wayland apps (e.g. Telegram from wofi) crash.
+if ! grep -q 'XDG_CURRENT_DESKTOP=' /etc/environment 2>/dev/null; then
+  log_info "Setting XDG_CURRENT_DESKTOP=sway..."
+  echo "XDG_CURRENT_DESKTOP=sway" >> /etc/environment
+fi
+
 # Rebuild font cache
 run_logged "Rebuilding font cache" fc-cache -fv
 
