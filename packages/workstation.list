@@ -5,6 +5,7 @@ sway
 swaylock
 swayidle
 xdg-desktop-portal-wlr
+xorg-xwayland
 
 # Bar
 waybar
