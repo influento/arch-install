@@ -47,6 +47,13 @@ if ! grep -q 'XDG_CURRENT_DESKTOP=' /etc/environment 2>/dev/null; then
   echo "XDG_CURRENT_DESKTOP=sway" >> /etc/environment
 fi
 
+# Allow Bluetooth input from non-bonded HID devices (Keychron keyboards, etc.)
+# Without this, some BT keyboards connect but produce no input.
+if [[ -f /etc/bluetooth/input.conf ]]; then
+  sed -i 's/^#ClassicBondedOnly=true/ClassicBondedOnly=false/' /etc/bluetooth/input.conf
+  log_info "Bluetooth ClassicBondedOnly set to false for HID input support."
+fi
+
 # Rebuild font cache
 run_logged "Rebuilding font cache" fc-cache -fv
 
