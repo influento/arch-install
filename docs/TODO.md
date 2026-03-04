@@ -13,6 +13,7 @@
 - **Blue light filter**: wlsunset (Wayland-native)
 - **Claude Code**: installed via npm globally
 - **Phase 3**: Configuration deployment (dotfiles integration complete, user configs in dotfiles repo)
+- **Bluetooth**: Removed blueman, replaced with custom Waybar BT widget (in dotfiles repo)
 
 ## Testing
 
@@ -21,6 +22,41 @@
 - [x] Test workstation profile end-to-end in VM (packages, services, dotfiles all verified)
 - [x] Test dotfiles integration in VM (symlinks, zsh, .config/* all correct)
 - [x] Test on physical hardware (AMD GPU, dual-boot — system installs and boots, Sway black screen was dotfiles-side)
+
+## Bluetooth Persistence Test Plan
+
+Test the Keychron BT keyboard across all sleep/boot scenarios.
+Run these in order and report results to Claude Code after each step.
+
+0. **Diagnose connect/disconnect cycle** — RESOLVED
+   - Root cause: blueman pairs but does NOT bond — no `[LinkKey]` written to `/var/lib/bluetooth/.../info`
+   - Without a stored link key, pairing works in-session but is lost on reboot
+   - The keyboard reconnects after reboot, host has no link key, keyboard drops: `Reason.Remote`
+   - Fix: pair via `bluetoothctl pair <MAC>` which performs full SSP bonding (link key persisted)
+   - Also ran `bluetoothctl trust <MAC>` and `bluetoothctl connect <MAC>`
+   - Verified `[LinkKey]` section now exists in the stored device info file
+   - `ClassicBondedOnly=false` in input.conf was a red herring — it allows input without bonding,
+     but the real problem was that blueman never created a bond in the first place
+1. **Pair + trust** — done via `bluetoothctl pair/trust/connect` (blueman pairing is insufficient)
+   - Verified: Paired=yes, Bonded=yes, Trusted=yes, Connected=yes
+2. **Cold boot** — PASSED — keyboard auto-connected on boot
+   - `bluetoothctl devices Connected` — shows the Keychron
+3. **swaylock** — lock the screen (`swaylock`), type password on BT keyboard, unlock
+4. **Suspend** — `systemctl suspend`, wake the machine, try typing immediately
+   - If keyboard doesn't respond, wait ~5s for the sleep hook to restart bluetooth
+   - `bluetoothctl devices Connected` — verify reconnection
+5. **Hibernate** — `systemctl hibernate`, power back on, try typing
+   - Same checks as suspend
+6. **Suspend + swaylock** — lock screen, close lid / suspend, wake, type password to unlock
+
+If any step fails, run `journalctl -u bluetooth --since "5 min ago"` and share the output.
+
+### Resolved: Blueman replaced with custom Waybar widget
+
+Blueman paired devices without bonding (no `[LinkKey]` persisted), breaking BT keyboards on
+every reboot. Replaced with a custom Waybar bluetooth widget (in dotfiles repo) that wraps
+`bluetoothctl` directly — proper SSP bonding, scan, pair, trust, connect, disconnect.
+Blueman removed from `packages/workstation.list`.
 
 ## Future Ideas (Backlog)
 
@@ -37,7 +73,6 @@
 - [ ] Secure Boot support
 - [ ] Post-install update/maintenance script
 - [ ] Hardware-specific quirks (laptop lid, touchpad, etc.)
-- [ ] BT cold boot fallback: if btusb autosuspend fix isn't enough, add a systemd oneshot service that reloads btusb after bluetooth.service (`modprobe -r btusb && modprobe btusb`) to force firmware retry
 
 ---
 

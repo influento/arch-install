@@ -47,6 +47,28 @@ if ! grep -q 'XDG_CURRENT_DESKTOP=' /etc/environment 2>/dev/null; then
   echo "XDG_CURRENT_DESKTOP=sway" >> /etc/environment
 fi
 
+# Auto-power Bluetooth adapter on boot so paired devices reconnect automatically.
+# Without this, the adapter stays off after reboot and paired devices (keyboards, etc.) drop.
+if [[ -f /etc/bluetooth/main.conf ]]; then
+  sed -i 's/^#AutoEnable=true$/AutoEnable=true/' /etc/bluetooth/main.conf
+  sed -i 's/^#AutoEnable=false$/AutoEnable=true/' /etc/bluetooth/main.conf
+  sed -i 's/^AutoEnable=false$/AutoEnable=true/' /etc/bluetooth/main.conf
+  log_info "Bluetooth AutoEnable set to true for persistent connections."
+fi
+
+# Restart bluetooth after suspend/hibernate so paired devices (keyboards, etc.) reconnect.
+# The BT controller loses power during sleep; without this, devices stay disconnected on wake.
+log_info "Installing bluetooth sleep hook..."
+mkdir -p /etc/systemd/system-sleep
+cat > /etc/systemd/system-sleep/bluetooth-restart.sh <<'BTSLEEP'
+#!/usr/bin/env bash
+if [[ "$1" == "post" ]]; then
+  sleep 1
+  systemctl restart bluetooth
+fi
+BTSLEEP
+chmod +x /etc/systemd/system-sleep/bluetooth-restart.sh
+
 # Allow Bluetooth input from non-bonded HID devices (Keychron keyboards, etc.)
 # Without this, some BT keyboards connect but produce no input.
 if [[ -f /etc/bluetooth/input.conf ]]; then

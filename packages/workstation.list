@@ -47,7 +47,6 @@ network-manager-applet
 # Bluetooth
 bluez
 bluez-utils
-blueman
 
 # Theming
 adwaita-icon-theme
