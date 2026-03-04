@@ -37,6 +37,7 @@
 - [ ] Secure Boot support
 - [ ] Post-install update/maintenance script
 - [ ] Hardware-specific quirks (laptop lid, touchpad, etc.)
+- [ ] BT cold boot fallback: if btusb autosuspend fix isn't enough, add a systemd oneshot service that reloads btusb after bluetooth.service (`modprobe -r btusb && modprobe btusb`) to force firmware retry
 
 ---
 

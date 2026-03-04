@@ -54,6 +54,12 @@ if [[ -f /etc/bluetooth/input.conf ]]; then
   log_info "Bluetooth ClassicBondedOnly set to false for HID input support."
 fi
 
+# Disable btusb autosuspend to prevent Intel BT firmware load failures (error -19).
+# USB power management can yank the controller mid-firmware-load; safe no-op on non-Intel HW.
+log_info "Disabling btusb autosuspend..."
+mkdir -p /etc/modprobe.d
+printf 'options btusb enable_autosuspend=n\n' > /etc/modprobe.d/btusb.conf
+
 # Rebuild font cache
 run_logged "Rebuilding font cache" fc-cache -fv
 
