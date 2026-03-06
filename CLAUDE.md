@@ -17,8 +17,11 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 
 ## Git
 
-- Do not add Claude as co-author in git commit messages
-- Do not commit files that contain secrets (.env, credentials, passwords)
+- Do not add `Co-Authored-By` trailers to git commits
+- Before every commit/push, audit the staged diff for sensitive information leaks:
+  usernames, passwords, API keys, tokens, private IPs, email addresses, or any
+  data that should not appear in a public repository. Flag any findings to the user
+  before proceeding
 
 ## Code Conventions
 
