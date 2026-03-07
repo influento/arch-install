@@ -75,6 +75,9 @@ libreoffice-fresh
 # Code editor
 code
 
+# Diagram rendering (Mermaid → SVG/PNG/PDF)
+mermaid-cli
+
 # VPN
 wireguard-tools
 
