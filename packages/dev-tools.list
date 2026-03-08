@@ -2,6 +2,7 @@
 
 # Editors (neovim is in base.list)
 tmux
+tree-sitter-cli
 
 # Git (git is in base.list)
 lazygit
