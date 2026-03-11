@@ -35,8 +35,9 @@ wl-clipboard
 qt5-wayland
 qt6-wayland
 
-# Brightness control (laptop keys — harmless on desktop)
+# Brightness / display control (both harmless when unused)
 brightnessctl
+ddcutil
 
 # Authentication agent (needed for privilege escalation prompts in Sway)
 polkit-gnome
