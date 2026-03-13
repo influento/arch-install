@@ -94,10 +94,6 @@ sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed \
   kvantum-theme-catppuccin-git \
   catppuccin-gtk-theme-mocha
 
-# Install global npm tools
-log_info "Installing Claude Code..."
-npm install -g @anthropic-ai/claude-code
-
 # Enable workstation services
 # TTY1 autologin for the created user (Sway auto-launches from .zshrc)
 log_info "Configuring TTY1 autologin for ${USERNAME}..."
