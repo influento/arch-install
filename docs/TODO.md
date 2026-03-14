@@ -18,7 +18,8 @@
 ## Testing
 
 - [x] ShellCheck all scripts (clean as of current session)
-- [x] Hyper-V VM test setup (configs + README in tests/)
+- [x] Hyper-V VM test setup (configs + README in tests/windows/)
+- [x] QEMU/KVM VM test setup (download-iso.sh + create-vm.sh in tests/linux/)
 - [x] Test workstation profile end-to-end in VM (packages, services, dotfiles all verified)
 - [x] Test dotfiles integration in VM (symlinks, zsh, .config/* all correct)
 - [x] Test on physical hardware (AMD GPU, dual-boot — system installs and boots, Sway black screen was dotfiles-side)

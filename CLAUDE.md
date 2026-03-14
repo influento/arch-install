@@ -47,15 +47,19 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 - `modules/` — feature scripts (gpu, firewall, ssh, virtualization)
 - `packages/` — plain-text package lists, one package per line, `#` for comments
 - `iso/` — custom ISO build system (Dockerfile + archiso overlay + build script)
-- `tests/` — VM test configs, ISO download, VM creation scripts, and testing guide
+- `tests/` — VM test configs and testing guide
+  - `tests/linux/` — QEMU/KVM scripts (download ISO, create/launch VM)
+  - `tests/windows/` — Hyper-V scripts (download ISO, create VM)
 - `docs/` — project documentation
 
 ## Commands
 
 - Lint: `npx shellcheck -x install.sh lib/*.sh profiles/*.sh modules/*.sh`
 - Build custom ISO: `docker build -t archiso-builder iso/ && docker run --rm --privileged -v "$(pwd)":/build archiso-builder`
-- Download stock ISO: `.\tests\download-iso.ps1`
-- Create test VM: `.\tests\create-vm.ps1`
+- Download stock ISO (Linux): `./tests/linux/download-iso.sh`
+- Create test VM (Linux): `./tests/linux/create-vm.sh`
+- Download stock ISO (Windows): `.\tests\windows\download-iso.ps1`
+- Create test VM (Windows): `.\tests\windows\create-vm.ps1`
 - Test in VM: see `tests/README.md` for full guide
 
 ## Key Patterns
