@@ -38,19 +38,21 @@ On boot, the ISO auto-launches a menu:
 
 - `qemu-full` (provides `qemu-system-x86_64`)
 - `edk2-ovmf` (UEFI firmware)
-- KVM enabled (check: `lsmod | grep kvm`)
+- KVM enabled (check: `ls /dev/kvm`)
+- Docker networking requires `docker0` forwarding in nftables (see `modules/firewall.sh`)
 
-### 1. Download the ISO
+### 1. Download the ISO (stock) or Build Custom ISO
 
+**Stock ISO** (manual install):
 ```bash
 ./tests/linux/download-iso.sh
 ```
 
-Downloads the latest Arch ISO, verifies SHA256 and GPG signature. Saves to `tests/iso/`.
-
-Options:
-- `--force` — re-download even if ISO exists
-- `--skip-gpg` — skip GPG signature verification
+**Custom ISO** (recommended — installer pre-loaded, SSH enabled):
+```bash
+docker build -t archiso-builder iso/
+docker run --rm --privileged -v "$(pwd)":/build archiso-builder
+```
 
 ### 2. Create and Launch the VM
 
@@ -58,12 +60,12 @@ Options:
 ./tests/linux/create-vm.sh
 ```
 
-Creates a UEFI VM with QEMU/KVM and launches it immediately:
-- 8 GB RAM, 2 CPUs, 60 GB VirtIO disk
-- OVMF UEFI firmware (no Secure Boot)
-- User-mode networking (internet access, no root required)
-- ISO auto-detected (prefers custom from `iso/out/`, falls back to `tests/iso/`)
-- QEMU monitor on stdio for VM control
+Creates a UEFI VM and launches headless (SSH only). Port **2222** on host forwards to port **22** in the guest.
+
+The script auto-cleans on each run:
+- Kills any running `archtest` QEMU process
+- Removes old disk and UEFI vars
+- Clears stale SSH host keys
 
 Options:
 - `--name NAME` — VM name (default: `archtest`)
@@ -71,23 +73,33 @@ Options:
 - `--cpus N` — number of CPUs (default: `2`)
 - `--disk-size GB` — disk size in GB (default: `60`)
 - `--iso PATH` — use a specific ISO
+- `--display` — show GTK window (default: headless)
 - `--no-launch` — create disk and print command without launching
 
-### 3. Run the Install
-
-On boot, select **2) Test installation** from the menu. The install runs fully
-unattended using `tests/vm-test.conf` (password: `test`).
-
-After install completes, the VM auto-reboots. Eject the ISO to boot from disk:
-- In the QEMU monitor (the terminal where you launched): type `eject ide1-cd0`
-- Or stop the VM and re-launch without the `-cdrom` and `-boot d` flags
-
-### 4. Cleanup
-
-To retest from scratch:
+### 3. Run the Install via SSH
 
 ```bash
-rm tests/vm/archtest.qcow2 tests/vm/archtest_VARS.fd
+ssh -p 2222 root@localhost          # password: root
+bash /root/arch-install/install.sh --config /root/arch-install/tests/vm-test.conf --auto
+```
+
+Or from the VM console (if using `--display`), select **2) Test installation**.
+
+### 4. After Install
+
+The VM auto-reboots into the installed system. SSH into the installed system:
+
+```bash
+ssh -p 2222 testuser@localhost      # password: test
+```
+
+Use `--display` to check the Sway desktop visually.
+
+### 5. Retest from Scratch
+
+Just run `create-vm.sh` again — it handles all cleanup automatically:
+
+```bash
 ./tests/linux/create-vm.sh
 ```
 
@@ -166,6 +178,7 @@ Hyper-V, change it to `/dev/sda`.
 ## What to Verify After Install
 
 **Services:**
+- [ ] `systemctl status sshd` — active (running)
 - [ ] `systemctl status bluetooth` — enabled (inactive without hardware)
 - [ ] `systemctl status docker` — active (running)
 - [ ] `systemctl status libvirtd` — enabled

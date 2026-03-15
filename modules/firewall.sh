@@ -31,6 +31,10 @@ table inet filter {
 
     chain forward {
         type filter hook forward priority 0; policy drop;
+
+        # Allow Docker container traffic
+        iifname "docker0" accept
+        oifname "docker0" ct state established,related accept
     }
 
     chain output {

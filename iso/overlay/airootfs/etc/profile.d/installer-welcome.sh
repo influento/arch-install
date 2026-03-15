@@ -10,6 +10,8 @@ if [[ -d /root/arch-install ]] && [[ -z "${_INSTALLER_SHOWN:-}" ]]; then
   printf '  2) \033[1mTest installation\033[0m (VM, unattended)\n'
   printf '  3) \033[1mDrop to shell\033[0m\n'
   printf '\n'
+  printf '  \033[90mSSH enabled — root:root (port 2222 in QEMU VM)\033[0m\n'
+  printf '\n'
   printf '  Select [1-3]: '
 
   read -r choice

@@ -7,7 +7,7 @@
 # - Arch ISO attached as CD-ROM
 # - User-mode networking (internet access, no root required)
 # - VirtIO disk and network for performance
-# - SPICE display with clipboard sharing
+# - Headless by default (SSH on port 2222), --display for GTK window
 #
 # Usage: ./tests/linux/create-vm.sh [options]
 #
@@ -17,6 +17,7 @@
 #   --cpus N            Number of CPUs (default: 2)
 #   --disk-size GB      Disk size in GB (default: 60)
 #   --iso PATH          Path to Arch ISO (default: auto-detect)
+#   --display           Show GTK window (default: headless)
 #   --no-launch         Create the VM disk and print the command, don't launch
 #   --help              Show this help
 
@@ -30,6 +31,7 @@ CPUS=2
 DISK_SIZE_GB=60
 ISO_PATH=""
 LAUNCH=true
+HEADLESS=true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$(dirname "$SCRIPT_DIR")"
@@ -49,6 +51,7 @@ while [[ $# -gt 0 ]]; do
     --disk-size)  DISK_SIZE_GB="$2"; shift 2 ;;
     --iso)        ISO_PATH="$2"; shift 2 ;;
     --no-launch)  LAUNCH=false; shift ;;
+    --display)    HEADLESS=false; shift ;;
     --help)
       sed -n '2,/^$/s/^# \?//p' "$0"
       exit 0
@@ -98,7 +101,7 @@ if [[ ! -f "$OVMF_CODE" ]]; then
 fi
 print_ok "OVMF firmware found"
 
-if lsmod | grep -q kvm; then
+if [[ -e /dev/kvm ]]; then
   print_ok "KVM module loaded"
 else
   print_fail "KVM module not loaded. Check your BIOS virtualization settings."
@@ -161,12 +164,29 @@ print_detail "Disk:        $DISK_SIZE_GB GB (qcow2) -> $disk_path"
 print_detail "ISO:         $ISO_PATH"
 print_detail "OVMF:        $OVMF_CODE"
 
-# Create disk image
-if [[ -f "$disk_path" ]]; then
-  print_fail "Disk already exists: $disk_path"
-  print_detail "To recreate: rm $disk_path $vars_path; then re-run this script."
-  exit 1
+# Kill any running VM with the same name
+existing_pid=$(pgrep -f "qemu-system.*-name ${VM_NAME}[ ]" || true)
+if [[ -n "$existing_pid" ]]; then
+  print_step "Stopping running VM '$VM_NAME' (pid $existing_pid)..."
+  kill "$existing_pid" 2>/dev/null || true
+  # Wait up to 5s for graceful shutdown, then force kill
+  for _ in $(seq 1 10); do
+    kill -0 "$existing_pid" 2>/dev/null || break
+    sleep 0.5
+  done
+  kill -9 "$existing_pid" 2>/dev/null || true
+  print_ok "Stopped"
 fi
+
+# Remove existing VM disk if present
+if [[ -f "$disk_path" ]] || [[ -f "$vars_path" ]]; then
+  print_step "Removing existing VM disk..."
+  rm -f "$disk_path" "$vars_path"
+  print_ok "Old VM removed"
+fi
+
+# Clear stale SSH host key (new VM = new host keys)
+ssh-keygen -R '[localhost]:2222' &>/dev/null || true
 
 print_step "Creating VM disk..."
 qemu-img create -f qcow2 "$disk_path" "${DISK_SIZE_GB}G"
@@ -198,10 +218,10 @@ qemu_cmd=(
   -boot d
 
   # Network (user-mode — internet access, no root required)
-  -nic "user,model=virtio-net-pci"
+  # Port 2222 on host forwards to SSH (port 22) in guest
+  -nic "user,model=virtio-net-pci,hostfwd=tcp::2222-:22"
 
   # Display
-  -display gtk
   -vga virtio
 
   # USB tablet for better mouse integration
@@ -212,6 +232,13 @@ qemu_cmd=(
   -monitor stdio
 )
 
+# Add display mode
+if [[ "$HEADLESS" == "true" ]]; then
+  qemu_cmd+=(-display none)
+else
+  qemu_cmd+=(-display gtk)
+fi
+
 # --- Launch or print ---
 
 printf '\n\033[90m==================================================\033[0m\n'
@@ -219,8 +246,13 @@ print_ok "VM '$VM_NAME' is ready."
 
 if [[ "$LAUNCH" == "true" ]]; then
   print_step "Launching VM..."
-  print_detail "QEMU monitor available on this terminal (type 'quit' to stop VM)"
-  print_detail "After install, eject ISO: in the monitor type 'eject ide1-cd0'"
+  if [[ "$HEADLESS" == "true" ]]; then
+    print_detail "Headless mode — use SSH: ssh -p 2222 root@localhost"
+    print_detail "QEMU monitor available on this terminal (type 'quit' to stop VM)"
+  else
+    print_detail "QEMU monitor available on this terminal (type 'quit' to stop VM)"
+    print_detail "After install, eject ISO: in the monitor type 'eject ide1-cd0'"
+  fi
   printf '\n'
   exec "${qemu_cmd[@]}"
 else

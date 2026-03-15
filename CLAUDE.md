@@ -62,6 +62,22 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 - Create test VM (Windows): `.\tests\windows\create-vm.ps1`
 - Test in VM: see `tests/README.md` for full guide
 
+## Linux VM Testing (QEMU/KVM)
+
+The test VM workflow: build custom ISO → create VM → SSH in → run installer.
+
+- **Build ISO**: `docker build -t archiso-builder iso/ && docker run --rm --privileged -v "$(pwd)":/build archiso-builder`
+- **Create & launch VM**: `./tests/linux/create-vm.sh` (headless by default)
+- **SSH into live ISO**: `ssh -p 2222 root@localhost` (password: `root`)
+- **Run test install**: `bash /root/arch-install/install.sh --config /root/arch-install/tests/vm-test.conf --auto`
+- **SSH into installed system**: `ssh -p 2222 testuser@localhost` (password: `test`)
+- **Show GTK window** (for checking Sway/desktop): `./tests/linux/create-vm.sh --display`
+
+Port mapping: **host 2222 → guest 22** (SSH). Do not use port 2222 for other VMs.
+
+The script auto-cleans on each run: kills any existing archtest QEMU process,
+removes old disk/UEFI vars, and clears stale SSH host keys. Config is in `tests/vm-test.conf`.
+
 ## Key Patterns
 
 - All user-facing output goes through `lib/log.sh` (`log_info`, `log_warn`, `log_error`, `log_section`)

@@ -86,7 +86,7 @@ tar -C "$BUILD_DIR" \
   --exclude='iso/out' \
   --exclude='iso/work' \
   --exclude='tests/iso' \
-  --exclude='old_notes' \
+  --exclude='tests/vm' \
   --exclude='.claude' \
   -cf - . | tar -C "$local_dest" -xf -
 
@@ -119,7 +119,7 @@ sed -i "s|^iso_publisher=.*|iso_publisher=\"${ISO_PUBLISHER}\"|" "${PROFILE_WORK
 # Add file permissions for our installer scripts
 # Insert before the closing ) of the file_permissions array
 sed -i '/^file_permissions=(/,/)/ {
-  /)/i\  ["/root/arch-install/install.sh"]="0:0:755"
+  /)/i\  ["/root/arch-install/install.sh"]="0:0:755"\n  ["/etc/shadow"]="0:0:400"
 }' "${PROFILE_WORK}/profiledef.sh"
 
 # --- Step 6: Build the ISO ---

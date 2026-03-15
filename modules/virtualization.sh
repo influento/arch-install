@@ -15,6 +15,7 @@ pacman -S --noconfirm --needed \
   qemu-full \
   libvirt \
   virt-manager \
+  virt-viewer \
   dnsmasq \
   edk2-ovmf
 

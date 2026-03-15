@@ -18,4 +18,6 @@ ClientAliveInterval 300
 ClientAliveCountMax 2
 EOF
 
-log_info "SSH hardened configuration deployed."
+enable_services sshd
+
+log_info "SSH configured and enabled."
