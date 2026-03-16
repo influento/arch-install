@@ -81,7 +81,7 @@ deploy_dotfiles() {
   # Run the dotfiles installer if it exists
   if [[ -f "${dest}/install.sh" ]]; then
     log_info "Running dotfiles installer with profile: workstation"
-    bash "${dest}/install.sh" --profile workstation --user "$USERNAME"
+    sudo -u "$USERNAME" bash "${dest}/install.sh" --profile workstation
   else
     log_warn "No install.sh found in dotfiles repo — skipping dotfiles installer."
     log_info "Dotfiles repo is available at $dest for manual setup."
@@ -92,6 +92,11 @@ deploy_dotfiles() {
 # Skips repos that are already cloned or have no URL configured.
 clone_infra_repos() {
   local infra_dir="/home/${USERNAME}/dev/infra"
+
+  # Ensure parent directories exist and are user-owned
+  # (may not exist if deploy_dotfiles was skipped)
+  mkdir -p "$infra_dir"
+  chown "${USERNAME}:${USERNAME}" "/home/${USERNAME}/dev" "$infra_dir"
 
   local repo url dest
   for repo in ARCH_INSTALL_REPO SERVER_INSTALL_REPO; do
