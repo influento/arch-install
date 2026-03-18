@@ -47,6 +47,7 @@ log_info "Building custom Arch Linux ISO"
 
 # Clean previous build artifacts
 rm -rf "$PROFILE_WORK" "$WORK_DIR"
+rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 # --- Step 1: Copy stock releng profile ---

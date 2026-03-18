@@ -46,6 +46,7 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 - `profiles/base.sh` — base setup: AUR helper (yay) + dotfiles deployment
 - `modules/` — feature scripts (gpu, firewall, ssh, virtualization)
 - `packages/` — plain-text package lists, one package per line, `#` for comments
+  - `packages/custom-apps.conf` — custom apps installed from GitHub releases (see Key Patterns)
 - `iso/` — custom ISO build system (Dockerfile + archiso overlay + build script)
 - `tests/` — VM test configs and testing guide
   - `tests/linux/` — QEMU/KVM scripts (download ISO, create/launch VM)
@@ -90,6 +91,11 @@ removes old disk/UEFI vars, and clears stale SSH host keys. Config is in `tests/
 - All interactive input (username, hostname, timezone, passwords) is collected up front before install begins
 - `--auto` flag enables fully unattended mode (skips confirmations, uses `PASSWORD` from config)
 - AUR packages (google-chrome, dropbox, python-gpgme) are installed via yay in the workstation profile
+- Custom apps (drawdesk, etc.) are installed from GitHub releases via `install_custom_apps`
+  - Config: `packages/custom-apps.conf` — format: `owner/repo tarball-{tag}-arch.tar.gz`
+  - `{tag}` is replaced with the latest release tag automatically
+  - Binaries go to `~/.local/bin/`, `.desktop` files to `~/.local/share/applications/`
+  - Non-fatal: a failed download/install doesn't block the rest of the install
 - Default shell is zsh; user is created with `/usr/bin/zsh`
 - Username and hostname are always prompted (no defaults) unless set via CLI/config
 - Docker and QEMU/KVM are always installed

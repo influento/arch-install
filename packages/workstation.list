@@ -60,8 +60,9 @@ kvantum-qt5
 # Tray icon support (needed for Chrome, JB Toolbox, Dropbox, etc.)
 libappindicator-gtk3
 
-# WebKit rendering engine (GTK integration)
+# WebKit rendering engine (4.0 for GTK apps, 4.1 for Tauri v2 apps)
 webkit2gtk
+webkit2gtk-4.1
 
 # Blue light filter (Wayland-native, minimal)
 wlsunset
@@ -85,6 +86,7 @@ wireguard-tools
 # Git + GitHub
 openssh
 github-cli
+sshpass
 
 # Communication
 telegram-desktop

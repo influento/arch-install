@@ -71,16 +71,15 @@ install.sh
   │   └── Enable base services
   │
   ├── Workstation profile (profiles/workstation.sh via chroot)
-  │   ├── Temp passwordless sudo for install
-  │   ├── Base setup (AUR helper + dotfiles deployment)
+  │   ├── Base setup (AUR helper, clone dotfiles + infra repos)
   │   ├── Install workstation package lists
   │   ├── Run feature modules (GPU, firewall, SSH, virtualization)
   │   ├── Inline setup (docker group, env vars, font cache)
   │   ├── Install AUR packages (google-chrome, dropbox, python-gpgme)
-  │   ├── Install global npm tools (claude-code)
+  │   ├── Install custom apps from GitHub releases (packages/custom-apps.conf)
+  │   ├── Run dotfiles installer (after packages so npm/cargo are available)
   │   ├── TTY1 autologin (Sway auto-launches from .zshrc)
-  │   ├── Enable services (bluetooth, docker)
-  │   └── Remove temp sudo rule
+  │   └── Enable services (bluetooth, docker)
   │
   ├── Post-chroot fixups (resolv.conf symlink)
   │

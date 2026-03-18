@@ -14,6 +14,7 @@
 - **Claude Code**: installed via npm globally
 - **Phase 3**: Configuration deployment (dotfiles integration complete, user configs in dotfiles repo)
 - **Bluetooth**: Removed blueman, replaced with custom Waybar BT widget (in dotfiles repo)
+- **Custom apps**: Generic GitHub release installer (`packages/custom-apps.conf` + `lib/packages.sh`)
 
 ## Testing
 

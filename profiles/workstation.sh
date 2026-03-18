@@ -94,6 +94,12 @@ sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed \
   kvantum-theme-catppuccin-git \
   catppuccin-gtk-theme-mocha
 
+# Install custom apps from GitHub releases
+install_custom_apps "${INSTALLER_DIR}/packages/custom-apps.conf"
+
+# Run dotfiles installer (after all packages so npm, cargo, etc. are available)
+run_dotfiles_installer
+
 # Enable workstation services
 # TTY1 autologin for the created user (Sway auto-launches from .zshrc)
 log_info "Configuring TTY1 autologin for ${USERNAME}..."

@@ -45,9 +45,9 @@ install_aur_helper() {
   fi
 }
 
-# Deploy the dotfiles repository to ~/dev/infra/dotfiles.
+# Clone the dotfiles repository to ~/dev/infra/dotfiles.
 # Checks for a pre-cloned cache (from custom ISO) before attempting a network clone.
-# After deployment, runs the dotfiles installer if it exists.
+# The dotfiles installer is run later by run_dotfiles_installer (after packages are installed).
 deploy_dotfiles() {
   if [[ -z "${DOTFILES_REPO:-}" ]]; then
     log_warn "DOTFILES_REPO not set — skipping dotfiles deployment."
@@ -77,8 +77,14 @@ deploy_dotfiles() {
     log_info "Cloning dotfiles from $DOTFILES_REPO..."
     sudo -u "$USERNAME" git clone "$DOTFILES_REPO" "$dest"
   fi
+}
 
-  # Run the dotfiles installer if it exists
+# Run the dotfiles installer. Called after all packages are installed
+# so that dotfiles scripts have access to npm, cargo, etc.
+run_dotfiles_installer() {
+  local infra_dir="/home/${USERNAME}/dev/infra"
+  local dest="${DOTFILES_DEST:-${infra_dir}/dotfiles}"
+
   if [[ -f "${dest}/install.sh" ]]; then
     log_info "Running dotfiles installer with profile: workstation"
     sudo -u "$USERNAME" bash "${dest}/install.sh" --profile workstation
