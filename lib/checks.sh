@@ -47,7 +47,7 @@ check_network() {
 
   # If WiFi hardware exists but no interface, try reloading the driver
   if ! _has_wireless_devices && _has_wifi_hardware; then
-    _recover_wifi_driver
+    _recover_wifi_driver || true
   fi
 
   # Check for wireless devices and offer WiFi setup
@@ -56,7 +56,7 @@ check_network() {
       if ! confirm "Set up WiFi?"; then
         break
       fi
-      _setup_wifi
+      _setup_wifi || true
       if _wait_for_network; then
         log_info "Network connectivity — OK"
         return 0
