@@ -29,6 +29,9 @@ btop
 # Linting
 shellcheck
 
+# Network
+nmap
+
 # System info
 fastfetch
 
