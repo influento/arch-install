@@ -19,6 +19,7 @@ source "${INSTALLER_DIR}/modules/gpu.sh"
 source "${INSTALLER_DIR}/modules/firewall.sh"
 source "${INSTALLER_DIR}/modules/ssh.sh"
 source "${INSTALLER_DIR}/modules/virtualization.sh"
+source "${INSTALLER_DIR}/modules/battery.sh"
 
 # Add user to docker group
 if id "$USERNAME" &>/dev/null; then
