@@ -58,7 +58,7 @@ kvantum
 kvantum-qt5
 
 # Tray icon support (needed for Chrome, JB Toolbox, Dropbox, etc.)
-libappindicator-gtk3
+libappindicator
 
 # WebKit rendering engine (4.0 for GTK apps, 4.1 for Tauri v2 apps)
 webkit2gtk
