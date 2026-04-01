@@ -31,6 +31,9 @@ grim
 slurp
 wl-clipboard
 
+# Virtual keyboard input (used by sway bindgesture)
+wtype
+
 # Qt Wayland support (native rendering instead of XWayland fallback)
 qt5-wayland
 qt6-wayland
