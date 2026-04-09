@@ -37,7 +37,7 @@ fastfetch
 
 # Languages and runtimes
 python
-python-pip
+uv
 nodejs
 npm
 rust

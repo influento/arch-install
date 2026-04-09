@@ -73,6 +73,10 @@ wlsunset
 # Clipboard history (Wayland-native, pairs with wl-clipboard)
 cliphist
 
+# Media player
+mpv
+yt-dlp
+
 # Desktop applications
 obsidian
 keepassxc
