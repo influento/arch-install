@@ -44,3 +44,10 @@ rust
 go
 dotnet-sdk
 aspnet-runtime
+
+# LaTeX
+texlive-basic
+texlive-latex
+texlive-latexrecommended
+texlive-latexextra
+texlive-fontsrecommended
