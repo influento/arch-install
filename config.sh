@@ -35,6 +35,10 @@ SERVER_INSTALL_REPO="${SERVER_INSTALL_REPO:-https://github.com/influento/debian-
 
 # --- Mirrors ---
 MIRROR_COUNTRY="${MIRROR_COUNTRY:-}"          # reflector country filter (e.g. "US" or "US,DE")
+# Appended to MIRROR_COUNTRY (detected or explicit) so reflector has a wider
+# pool to pick from if the primary country has few/slow mirrors. EU countries
+# chosen for large mirror pools, uptime, and no censorship.
+MIRROR_FALLBACK_COUNTRIES="${MIRROR_FALLBACK_COUNTRIES:-DE,NL,SE,FI,AT}"
 
 # --- Paths (internal, don't override) ---
 INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -33,9 +33,23 @@ setup_mirrors() {
       [[ -z "$MIRROR_COUNTRY" ]] && log_warn "Could not detect country, using worldwide mirrors."
     fi
 
-    if [[ -n "$MIRROR_COUNTRY" ]]; then
-      reflector_args+=(--country "$MIRROR_COUNTRY")
-      log_info "Filtering mirrors by country: $MIRROR_COUNTRY"
+    # Merge MIRROR_COUNTRY with MIRROR_FALLBACK_COUNTRIES, dedup preserving order.
+    local country_filter=""
+    local combined="${MIRROR_COUNTRY}${MIRROR_COUNTRY:+,}${MIRROR_FALLBACK_COUNTRIES:-}"
+    if [[ -n "$combined" ]]; then
+      local seen="" cc
+      while IFS= read -r cc; do
+        [[ -z "$cc" ]] && continue
+        if [[ ",${seen}," != *",${cc},"* ]]; then
+          seen="${seen:+$seen,}$cc"
+        fi
+      done < <(printf '%s' "$combined" | tr ',' '\n' | tr -d '[:space:]')
+      country_filter="$seen"
+    fi
+
+    if [[ -n "$country_filter" ]]; then
+      reflector_args+=(--country "$country_filter")
+      log_info "Filtering mirrors by country: $country_filter"
     fi
 
     run_logged "Updating mirrorlist with reflector" reflector "${reflector_args[@]}"
