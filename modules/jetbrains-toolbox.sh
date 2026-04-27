@@ -3,19 +3,17 @@
 # Downloads the latest Toolbox tarball from JetBrains and unpacks its bin/
 # tree to ~/.local/share/JetBrains/Toolbox/bin. On first launch Toolbox
 # writes its own ~/.local/share/applications/jetbrains-toolbox.desktop,
-# so we don't ship one. We do drop an autostart entry so Toolbox launches
-# into the tray on first login — from there the user signs in and pulls
-# Rider and the rest of dotUltimate.
+# so we don't ship one. Autostart is handled by an `exec` line in the
+# dotfiles Sway config (Sway doesn't honor XDG autostart).
 # Toolbox self-updates and manages IDE updates after that.
 # Non-fatal: a failed download must not abort the workstation install.
 
 install_jetbrains_toolbox() {
   log_info "Installing JetBrains Toolbox..."
 
-  local user_home toolbox_dir autostart_dir
+  local user_home toolbox_dir
   user_home="$(eval echo "~${USERNAME}")"
   toolbox_dir="${user_home}/.local/share/JetBrains/Toolbox"
-  autostart_dir="${user_home}/.config/autostart"
 
   # Resolve the latest Toolbox tarball URL via the official release feed.
   local release_json download_url
@@ -61,25 +59,11 @@ install_jetbrains_toolbox() {
     return 0
   fi
 
-  mkdir -p "$toolbox_dir" "$autostart_dir"
+  mkdir -p "$toolbox_dir"
   rm -rf "${toolbox_dir:?}/bin"
   cp -r "$extracted_bin" "$toolbox_dir/"
 
-  # Autostart entry — launches Toolbox into the tray on first login.
-  # Toolbox manages its own entry from then on via its "Launch at system
-  # startup" setting, but we need this one so it runs before the user has
-  # signed in and opened the settings.
-  cat > "${autostart_dir}/jetbrains-toolbox.desktop" <<AUTOSTART
-[Desktop Entry]
-Type=Application
-Name=JetBrains Toolbox
-Icon=jetbrains-toolbox
-Exec=${toolbox_dir}/bin/jetbrains-toolbox
-Terminal=false
-X-GNOME-Autostart-enabled=true
-AUTOSTART
-
-  chown -R "${USERNAME}:${USERNAME}" "${user_home}/.local" "${user_home}/.config"
+  chown -R "${USERNAME}:${USERNAME}" "${user_home}/.local"
 
   rm -rf "$tmp_dir"
   log_info "JetBrains Toolbox installed. Sign in on first launch to install Rider and dotUltimate tools."
