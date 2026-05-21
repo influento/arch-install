@@ -28,6 +28,11 @@ if id "$USERNAME" &>/dev/null; then
   log_info "User $USERNAME added to docker group."
 fi
 
+# Register git-lfs filter hooks system-wide (writes to /etc/gitconfig)
+# Without this, cloning LFS repos pulls pointer files instead of real content.
+log_info "Registering git-lfs filter hooks system-wide..."
+git lfs install --system --skip-repo
+
 # Set default editor system-wide
 if [[ ! -f /etc/environment ]] || ! grep -q 'EDITOR=' /etc/environment; then
   log_info "Setting EDITOR and VISUAL to nvim..."
