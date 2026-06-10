@@ -171,7 +171,9 @@ else
   ROOT_PASSWORD=$(prompt_password "Root password")
   USER_PASSWORD=$(prompt_password "Password for $USERNAME")
 fi
-export ROOT_PASSWORD USER_PASSWORD
+# ROOT_PASSWORD / USER_PASSWORD are intentionally NOT exported: chroot.sh reads
+# them in-process (it is sourced, same shell) and writes them %q-escaped
+# (mode 600) into .chroot-env, so they never leak into unrelated child processes.
 
 # Disk selection
 if [[ -z "$TARGET_DISK" ]]; then
@@ -219,7 +221,8 @@ print_summary \
   "Kernels=linux + linux-lts" \
   "Bootloader=$BOOTLOADER" \
   "Disk=$TARGET_DISK" \
-  "Wipe /home=$WIPE_HOME"
+  "Wipe /home=$WIPE_HOME" \
+  "SSH server=$ENABLE_SSH"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log_info "Dry run — exiting before making changes."
@@ -227,6 +230,10 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
 fi
 
 confirm "Proceed with installation?" || die "Aborted by user."
+
+# From here the installer copies a password-bearing .chroot-env into the target.
+# Shred it (and remove the installer copy) on ANY exit, not just the happy path.
+trap 'cleanup_chroot || true' EXIT
 
 # ===================================================================
 #  Phase 1: Disk + Base System (live ISO environment)

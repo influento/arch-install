@@ -26,6 +26,7 @@ GPU_DRIVER="${GPU_DRIVER:-auto}"              # auto | amd | intel | nvidia | no
 # --- Software ---
 EDITOR="${EDITOR:-nvim}"                      # default editor for visudo, git, etc.
 AUR_HELPER="${AUR_HELPER:-yay}"               # yay | paru
+ENABLE_SSH="${ENABLE_SSH:-yes}"               # run an inbound SSH server? yes|no (on by default; hardened: no root login + PerSourcePenalties lockout)
 
 # --- Repos (cloned to ~/dev/infra/) ---
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/influento/dotfiles.git}"
@@ -41,6 +42,7 @@ MIRROR_COUNTRY="${MIRROR_COUNTRY:-}"          # reflector country filter (e.g. "
 MIRROR_FALLBACK_COUNTRIES="${MIRROR_FALLBACK_COUNTRIES:-DE,NL,SE,FI,AT}"
 
 # --- Paths (internal, don't override) ---
+# shellcheck disable=SC2034  # consumed by install.sh and the chroot wrapper after sourcing
 INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="${LOG_FILE:-/var/log/arch-install.log}"
 MOUNT_POINT="${MOUNT_POINT:-/mnt}"

@@ -55,7 +55,7 @@ including all packages, services, modules, AUR builds, and dotfiles integration.
 
 ## Commands
 
-- Lint: `npx shellcheck -x install.sh lib/*.sh profiles/*.sh modules/*.sh`
+- Lint: `npx shellcheck -x install.sh config.sh lib/*.sh profiles/*.sh modules/*.sh iso/build.sh tests/linux/*.sh`
 - Build custom ISO: `docker build -t archiso-builder iso/ && docker run --rm --privileged -v "$(pwd)":/build archiso-builder`
 - Download stock ISO (Linux): `./tests/linux/download-iso.sh`
 - Create test VM (Linux): `./tests/linux/create-vm.sh`
@@ -71,7 +71,7 @@ The test VM workflow: build custom ISO → create VM → SSH in → run installe
 - **Create & launch VM**: `./tests/linux/create-vm.sh` (headless by default)
 - **SSH into live ISO**: `ssh -p 2222 root@localhost` (password: `root`)
 - **Run test install**: `bash /root/arch-install/install.sh --config /root/arch-install/tests/vm-test.conf --auto`
-- **SSH into installed system**: `ssh -p 2222 testuser@localhost` (password: `test`)
+- **SSH into installed system**: `ssh -p 2222 testuser@localhost` (password: `test`) — sshd is enabled by default
 - **Show GTK window** (for checking Sway/desktop): `./tests/linux/create-vm.sh --display`
 
 Port mapping: **host 2222 → guest 22** (SSH). Do not use port 2222 for other VMs.
@@ -87,7 +87,7 @@ removes old disk/UEFI vars, and clears stale SSH host keys. Config is in `tests/
 - Simple setup steps (env vars, group membership, font cache) are inlined in `workstation.sh`
 - User-level config deployment is NOT in this repo — it's in the dotfiles repo
 - Everything after pacstrap runs inside chroot via `lib/chroot.sh`
-- Configuration variables follow a 3-layer precedence: CLI flags > config file > `config.sh` defaults
+- Configuration is layered: `config.sh` defaults load first, then CLI flags and `--config` files override in the order they appear on the command line (later wins — put `--config` before individual flags if those flags should take precedence)
 - All interactive input (username, hostname, timezone, passwords) is collected up front before install begins
 - `--auto` flag enables fully unattended mode (skips confirmations, uses `PASSWORD` from config)
 - AUR packages (google-chrome, dropbox, python-gpgme) are installed via yay in the workstation profile
@@ -99,6 +99,7 @@ removes old disk/UEFI vars, and clears stale SSH host keys. Config is in `tests/
 - Default shell is zsh; user is created with `/usr/bin/zsh`
 - Username and hostname are always prompted (no defaults) unless set via CLI/config
 - Docker and QEMU/KVM are always installed
+- SSH server is enabled by default (`ENABLE_SSH=yes`); set `ENABLE_SSH=no` to skip it. `modules/ssh.sh` disables root login, allows user password auth, and throttles brute force via `MaxAuthTries 3` + OpenSSH `PerSourcePenalties` (30s/60s escalating per-IP lockout, 10-min cap). The nftables firewall permits port 22
 - Custom ISO auto-launches an install menu on boot (full install / test install / shell)
 
 ## Editing Guidelines

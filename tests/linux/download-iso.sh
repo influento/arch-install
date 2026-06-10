@@ -161,13 +161,21 @@ else
       gpg --keyserver keyserver.ubuntu.com --recv-keys "$SIGNING_KEY_FINGERPRINT" 2>/dev/null || true
     fi
 
-    # Verify
+    # Verify. Distinguish a genuine BAD signature (tampering -> fatal) from an
+    # inability to verify, e.g. the signing key couldn't be fetched (-> soft
+    # warning, since the API SHA256 already matched). gpg's plain exit code is
+    # non-zero for both, so inspect the machine-readable status output.
     print_detail "Verifying signature..."
-    if gpg --verify "$sig_path" "$iso_path" 2>/dev/null; then
+    gpg_status="$(gpg --status-fd=1 --verify "$sig_path" "$iso_path" 2>/dev/null || true)"
+    if printf '%s\n' "$gpg_status" | grep -q '^\[GNUPG:\] GOODSIG'; then
       print_ok "GPG signature is valid."
+    elif printf '%s\n' "$gpg_status" | grep -q '^\[GNUPG:\] BADSIG'; then
+      print_fail "GPG signature is BAD — the ISO appears tampered with. Deleting."
+      rm -f "$iso_path" "$sig_path"
+      exit 1
     else
-      print_fail "GPG signature verification FAILED!"
-      print_detail "SHA256 passed, so this may be a key trust issue. Check manually."
+      print_fail "Could not verify GPG signature (signing key unavailable?)."
+      print_detail "SHA256 already matched the official API, so proceeding; verify manually if concerned."
     fi
   fi
 fi

@@ -109,7 +109,9 @@ configure_bootloader() {
       local theme_dir="/boot/grub/themes/catppuccin-mocha"
       local tmp_dir
       tmp_dir="$(mktemp -d)"
-      git clone --depth 1 https://github.com/catppuccin/grub.git "$tmp_dir"
+      # Pinned to a release tag rather than HEAD so a changed/compromised
+      # upstream default branch can't alter what gets copied into /boot.
+      git clone --depth 1 --branch v1.0.0 https://github.com/catppuccin/grub.git "$tmp_dir"
       mkdir -p "$theme_dir"
       cp -r "$tmp_dir/src/catppuccin-mocha-grub-theme/"* "$theme_dir/"
       rm -rf "$tmp_dir"

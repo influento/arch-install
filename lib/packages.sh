@@ -137,7 +137,7 @@ install_github_release() {
 install_custom_apps() {
   local conf_file="$1"
   local user_home
-  user_home="$(eval echo "~${USERNAME}")"
+  user_home="$(getent passwd "$USERNAME" | cut -d: -f6)"
 
   if [[ ! -f "$conf_file" ]]; then
     log_warn "Custom apps config not found: ${conf_file}"

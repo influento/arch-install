@@ -28,13 +28,44 @@ run_in_chroot() {
     done
   fi
 
-  # Write passwords to a separate file with proper escaping.
-  # Passwords can contain shell metacharacters ($, ", \, backticks) that would
-  # be re-interpreted if embedded directly in the heredoc wrapper script.
+  # Write ALL config + passwords to a separate file, printf %q-escaped, then
+  # have the wrapper source it. Any value can contain shell metacharacters
+  # ($, ", \, backticks, ;) that would otherwise break out of — or inject into —
+  # the generated wrapper if interpolated directly. %q makes each value a single
+  # safe shell token that round-trips back to the exact original on source.
   local env_file="${MOUNT_POINT}${chroot_installer}/.chroot-env"
   {
-    printf 'export ROOT_PASSWORD=%q\n' "${ROOT_PASSWORD:-}"
-    printf 'export USER_PASSWORD=%q\n' "${USER_PASSWORD:-}"
+    printf 'export INSTALLER_DIR=%q\n'       "${chroot_installer}"
+    printf 'export LOG_FILE=%q\n'            "${LOG_FILE}"
+    printf 'export PROFILE=%q\n'             "workstation"
+    printf 'export HOSTNAME=%q\n'            "${HOSTNAME}"
+    printf 'export USERNAME=%q\n'            "${USERNAME}"
+    printf 'export TIMEZONE=%q\n'            "${TIMEZONE}"
+    printf 'export LOCALE=%q\n'              "${LOCALE}"
+    printf 'export KEYMAP=%q\n'              "${KEYMAP}"
+    printf 'export BOOTLOADER=%q\n'          "${BOOTLOADER}"
+    printf 'export FS_TYPE=%q\n'             "${FS_TYPE}"
+    printf 'export SWAP_SIZE=%q\n'           "${SWAP_SIZE}"
+    printf 'export GPU_DRIVER=%q\n'          "${GPU_DRIVER}"
+    printf 'export EDITOR=%q\n'              "${EDITOR}"
+    printf 'export AUR_HELPER=%q\n'          "${AUR_HELPER}"
+    printf 'export ENABLE_SSH=%q\n'          "${ENABLE_SSH:-no}"
+    printf 'export DOTFILES_REPO=%q\n'       "${DOTFILES_REPO:-}"
+    printf 'export DOTFILES_DEST=%q\n'       "${DOTFILES_DEST:-}"
+    printf 'export ARCH_INSTALL_REPO=%q\n'   "${ARCH_INSTALL_REPO:-}"
+    printf 'export SERVER_INSTALL_REPO=%q\n' "${SERVER_INSTALL_REPO:-}"
+    printf 'export MOUNT_POINT=%q\n'         ""
+    printf 'export PART_EFI=%q\n'            "${PART_EFI:-}"
+    printf 'export PART_SWAP=%q\n'           "${PART_SWAP:-}"
+    printf 'export PART_ROOT=%q\n'           "${PART_ROOT:-}"
+    printf 'export PART_HOME=%q\n'           "${PART_HOME:-}"
+    printf 'export WIPE_HOME=%q\n'           "${WIPE_HOME:-}"
+    printf 'export ROOT_SIZE=%q\n'           "${ROOT_SIZE:-}"
+    printf 'export SWAP_UUID=%q\n'           "${SWAP_UUID:-}"
+    printf 'export DEBUG=%q\n'               "${DEBUG:-0}"
+    printf 'export AUTO_MODE=%q\n'           "${AUTO_MODE:-0}"
+    printf 'export ROOT_PASSWORD=%q\n'       "${ROOT_PASSWORD:-}"
+    printf 'export USER_PASSWORD=%q\n'       "${USER_PASSWORD:-}"
   } > "$env_file"
   chmod 600 "$env_file"
 
@@ -44,37 +75,9 @@ run_in_chroot() {
 #!/usr/bin/env bash
 set -euo pipefail
 
-export INSTALLER_DIR="${chroot_installer}"
-export LOG_FILE="${LOG_FILE}"
-export PROFILE="workstation"
-export HOSTNAME="${HOSTNAME}"
-export USERNAME="${USERNAME}"
-export TIMEZONE="${TIMEZONE}"
-export LOCALE="${LOCALE}"
-export KEYMAP="${KEYMAP}"
-export BOOTLOADER="${BOOTLOADER}"
-export FS_TYPE="${FS_TYPE}"
-export SWAP_SIZE="${SWAP_SIZE}"
-export GPU_DRIVER="${GPU_DRIVER}"
-export EDITOR="${EDITOR}"
-export AUR_HELPER="${AUR_HELPER}"
-export DOTFILES_REPO="${DOTFILES_REPO:-}"
-export DOTFILES_DEST="${DOTFILES_DEST:-}"
-export ARCH_INSTALL_REPO="${ARCH_INSTALL_REPO:-}"
-export SERVER_INSTALL_REPO="${SERVER_INSTALL_REPO:-}"
-export MOUNT_POINT=""
-export PART_EFI="${PART_EFI:-}"
-export PART_SWAP="${PART_SWAP:-}"
-export PART_ROOT="${PART_ROOT:-}"
-export PART_HOME="${PART_HOME:-}"
-export WIPE_HOME="${WIPE_HOME:-}"
-export ROOT_SIZE="${ROOT_SIZE:-}"
-export SWAP_UUID="${SWAP_UUID:-}"
-export DEBUG="${DEBUG:-0}"
-export AUTO_MODE="${AUTO_MODE:-0}"
-
-# Source passwords (escaped separately to handle shell metacharacters)
-source "\${INSTALLER_DIR}/.chroot-env"
+# All config + passwords were written (printf %q-escaped) to .chroot-env;
+# sourcing it defines every variable, including INSTALLER_DIR used just below.
+source "${chroot_installer}/.chroot-env"
 
 # Source libraries
 source "\${INSTALLER_DIR}/lib/log.sh"

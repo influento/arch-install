@@ -4,6 +4,15 @@
 setup_mirrors() {
   log_section "Mirror Configuration"
 
+  # Validate any user-supplied country filter (CLI flag / config file). Geo-detected
+  # values are already regex-checked. Accept one or more 2-letter uppercase codes,
+  # comma-separated (e.g. "US" or "US,DE"); otherwise drop it so detection / the
+  # worldwide mirror list can take over instead of feeding reflector a bad value.
+  if [[ -n "$MIRROR_COUNTRY" && ! "$MIRROR_COUNTRY" =~ ^[A-Z]{2}(,[A-Z]{2})*$ ]]; then
+    log_warn "Ignoring invalid mirror country '$MIRROR_COUNTRY' (expected e.g. US or US,DE)."
+    MIRROR_COUNTRY=""
+  fi
+
   if command -v reflector &>/dev/null; then
     local reflector_args=(
       --sort rate

@@ -103,7 +103,9 @@ if [[ -n "${DOTFILES_REPO:-}" ]]; then
   log_info "Pre-cloning dotfiles repo into ISO..."
   log_detail "$DOTFILES_REPO"
   git clone "$DOTFILES_REPO" "${local_dest}/.dotfiles-cache"
-  # Remove .git/config credentials if any, keep repo functional
+  # Cloned from the public DOTFILES_REPO URL, so no credentials are embedded in
+  # .git/config. The cache's origin is also re-set to DOTFILES_REPO at deploy
+  # time (profiles/base.sh) when the cache is copied into the installed system.
   log_detail "Dotfiles cached at /root/arch-install/.dotfiles-cache/"
 else
   log_info "DOTFILES_REPO not set — skipping dotfiles pre-clone."
@@ -135,7 +137,7 @@ mkarchiso -v -w "$WORK_DIR" -o "$OUTPUT_DIR" "$PROFILE_WORK"
 
 log_info "Generating checksums..."
 cd "$OUTPUT_DIR"
-iso_file=$(ls -1 "${ISO_NAME}"-*.iso 2>/dev/null | head -1)
+iso_file=$(find . -maxdepth 1 -type f -name "${ISO_NAME}-*.iso" -printf '%f\n' 2>/dev/null | sort | head -1)
 
 if [[ -z "$iso_file" ]]; then
   log_error "No ISO file found in output directory!"

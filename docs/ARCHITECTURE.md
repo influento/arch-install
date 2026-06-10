@@ -10,6 +10,7 @@
 | Kernel | **linux + linux-lts** | Both installed; LTS as fallback boot entry |
 | Hibernation | **Enabled** | resume hook + swap UUID in boot params |
 | Firewall | **nftables** | Kernel-native, modern replacement for iptables |
+| SSH server | **Enabled + hardened** | No root login; brute-force lockout via `MaxAuthTries 3` + `PerSourcePenalties`; opt out with `ENABLE_SSH=no` |
 | DNS resolver | **systemd-resolved** | Modern, integrates with NetworkManager |
 | Default editor | **neovim** | Used for visudo, git, etc. |
 | Default shell | **zsh + oh-my-zsh** | Bash-compatible, plugin ecosystem, starship prompt |

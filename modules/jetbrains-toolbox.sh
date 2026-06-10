@@ -12,7 +12,7 @@ install_jetbrains_toolbox() {
   log_info "Installing JetBrains Toolbox..."
 
   local user_home toolbox_dir
-  user_home="$(eval echo "~${USERNAME}")"
+  user_home="$(getent passwd "$USERNAME" | cut -d: -f6)"
   toolbox_dir="${user_home}/.local/share/JetBrains/Toolbox"
 
   # Resolve the latest Toolbox tarball URL via the official release feed.
