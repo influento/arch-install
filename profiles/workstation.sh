@@ -97,9 +97,7 @@ log_info "Installing AUR packages..."
 sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed \
   google-chrome \
   dropbox \
-  python-gpgme \
-  kvantum-theme-catppuccin-git \
-  catppuccin-gtk-theme-mocha
+  python-gpgme
 
 # Install custom apps from GitHub releases
 install_custom_apps "${INSTALLER_DIR}/packages/custom-apps.conf"
