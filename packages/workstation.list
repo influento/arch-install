@@ -61,6 +61,10 @@ qt6ct
 # Tray icon support (needed for Chrome, JB Toolbox, Dropbox, etc.)
 libappindicator
 
+# Dropbox runtime dependency (GPGME Python bindings for package signature
+# verification). In extra/ — not AUR despite Dropbox itself being AUR.
+python-gpgme
+
 # WebKit rendering engine
 # - 4.1: Tauri v2 apps (drawdesk), telegram-desktop link previews, other GTK3 apps
 # - 6.0: GTK4 apps (future-proofing; Tauri v2 still defaults to 4.1 on most builds)
