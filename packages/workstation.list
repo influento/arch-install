@@ -94,6 +94,12 @@ libreoffice-fresh
 # Code editor
 code
 
+# Document / OCR tooling
+qpdf
+pandoc-cli
+tesseract
+tesseract-data-eng
+
 # VPN
 wireguard-tools
 
