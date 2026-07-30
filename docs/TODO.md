@@ -68,7 +68,8 @@ Blueman removed from `packages/workstation.list`.
 - [ ] Idempotency checks (re-running scripts doesn't break things)
 - [ ] Error recovery (resume after failure)
 - [ ] Optional module: Gaming (Steam, Lutris, gamemode, mangohud)
-- [ ] Optional module: Remote desktop (remmina, freerdp)
+- [ ] Optional module: Remote desktop — RDP side only (remmina, freerdp);
+      VNC is already covered by tigervnc in `packages/workstation.list`
 - [ ] Optional module: Container orchestration (k3s, podman)
 - [ ] Encryption support (LUKS)
 - [ ] Btrfs snapshots with Snapper

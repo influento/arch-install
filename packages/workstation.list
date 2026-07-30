@@ -103,6 +103,10 @@ tesseract-data-eng
 # VPN
 wireguard-tools
 
+# Remote desktop client (vncviewer). Ships a server too, but nothing enables it
+# and the firewall drops 5900-5901 — tunnel over SSH if you ever serve a desktop.
+tigervnc
+
 # Git + GitHub
 openssh
 github-cli
