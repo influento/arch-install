@@ -107,6 +107,9 @@ wireguard-tools
 # and the firewall drops 5900-5901 — tunnel over SSH if you ever serve a desktop.
 tigervnc
 
+# File sync / transfer (backups, mirroring, rsync-over-ssh to servers)
+rsync
+
 # Git + GitHub
 openssh
 github-cli
