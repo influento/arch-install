@@ -103,8 +103,15 @@ tesseract-data-eng
 # VPN
 wireguard-tools
 
-# Remote desktop client (vncviewer). Ships a server too, but nothing enables it
-# and the firewall drops 5900-5901 — tunnel over SSH if you ever serve a desktop.
+# Preferred VNC client (remote-viewer). GTK and Wayland-native, so it honours the
+# compositor's output scale. Also pulled in by modules/virtualization.sh; listed
+# here too because remote access must not depend on that module being enabled.
+virt-viewer
+
+# Fallback VNC client (vncviewer). X11-only, so under Sway it goes through
+# XWayland: a scaled output is rendered at 1x then upscaled, halving the effective
+# resolution of a HiDPI stream. Prefer virt-viewer. Ships a server too, but nothing
+# enables it and the firewall drops 5900-5901 — tunnel over SSH to reach one.
 tigervnc
 
 # Wayland-native VNC server for Sway (headless or screen sharing). Not enabled by

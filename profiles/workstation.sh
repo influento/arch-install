@@ -98,22 +98,62 @@ sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed \
   google-chrome \
   dropbox
 
+# Optional AUR packages — a build failure here must not abort the install
+log_info "Installing optional AUR packages..."
+# wlvncc-git: Wayland-native VNC client written for wayvnc; best quality of the
+# three clients, but a -git package that can fail to build. virt-viewer (official
+# repo) stays the dependable default.
+sudo -u "$USERNAME" "${AUR_HELPER:-yay}" -S --noconfirm --needed wlvncc-git ||
+  log_warn "wlvncc-git failed to build — use remote-viewer (virt-viewer) instead."
+
 # Install custom apps from GitHub releases
 install_custom_apps "${INSTALLER_DIR}/packages/custom-apps.conf"
 
 # Run dotfiles installer (after all packages so npm, cargo, etc. are available)
 run_dotfiles_installer
 
-# Enable workstation services
-# TTY1 autologin for the created user (Sway auto-launches from .zshrc)
-log_info "Configuring TTY1 autologin for ${USERNAME}..."
-mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<AUTOLOGIN
+# TTY1 autologin for the created user (Sway auto-launches from .zshrc).
+# Needed so an unattended reboot — after a power cut, say — brings the compositor
+# up on its own; otherwise sshd comes back but there is no session to connect to.
+# Safe only because the dotfiles Sway config runs the lock screen on startup, so
+# the session comes up locked: autologin starts the compositor, it does not remove
+# authentication. This matters because / and /home are unencrypted.
+#
+# Scoped to tty1 only, so the other VTs keep a normal login prompt.
+# The empty ExecStart= is required: ExecStart is a list, so without clearing it
+# systemd appends and refuses to start a unit carrying two commands.
+# Flags mirror the stock getty@.service, which passes the tty as - (from stdin)
+# rather than %I; matching the shipped unit avoids surprises across upgrades.
+#
+# The drop-in is installed only if the deployed Sway config really does lock at
+# startup — the invariant spans two repos, so it is enforced here rather than
+# documented and hoped for. The match is anchored: `exec ~/.local/bin/lock` at the
+# start of a line counts, but `bindsym $mod+Escape exec ~/.local/bin/lock` does
+# not — a keybinding locks on demand and leaves a booted machine wide open.
+sway_lock_re='^[[:space:]]*exec(_always)?[[:space:]]+~/\.local/bin/lock'
+sway_config="/home/${USERNAME}/.config/sway/config"
+
+if grep -Eq "$sway_lock_re" "$sway_config" 2>/dev/null; then
+  log_info "Configuring TTY1 autologin for ${USERNAME}..."
+  mkdir -p /etc/systemd/system/getty@tty1.service.d
+  cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<AUTOLOGIN
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin ${USERNAME} --noclear %I \$TERM
+ExecStart=-/usr/bin/agetty --noreset --noclear --autologin ${USERNAME} - \${TERM}
 AUTOLOGIN
+else
+  log_warn "TTY1 autologin NOT installed — this is deliberate, not a failure."
+  log_warn "No startup lock found in ${sway_config}"
+  log_warn "  (looked for a line matching: ${sway_lock_re})"
+  log_warn "Autologin without it would drop straight to an unlocked desktop on a"
+  log_warn "machine with no full-disk encryption, so it was skipped."
+  log_warn "This machine will stop at a login prompt after reboot; a headless box"
+  log_warn "will have sshd but no graphical session to connect to."
+  log_warn "Fix: add 'exec ~/.local/bin/lock' to the dotfiles Sway config, then"
+  log_warn "re-run the installer or write the drop-in by hand."
+fi
 
+# Enable workstation services
 enable_services \
   bluetooth \
   docker

@@ -21,8 +21,9 @@
 | Browser | **Google Chrome** (AUR) | Installed via yay |
 | Terminal | **Ghostty** | Single terminal, no fallback needed |
 | File manager | **yazi** (TUI) | Lightweight, terminal-native |
-| Login | **TTY autologin** | No display manager; Sway auto-launches from .zshrc |
+| Login | **TTY1 autologin** | No display manager; Sway auto-launches from .zshrc. Starts the compositor unattended after a reboot; safe only because the dotfiles Sway config locks the session on startup (`/` and `/home` are unencrypted) |
 | Virtualization | **QEMU/KVM** | Kernel-native hypervisor, virt-manager GUI |
+| Remote access | **wayvnc + waypipe** | Wayland-native; serves the live Sway session, no second X server. Clients: virt-viewer (default), wlvncc-git (AUR), tigervnc (X11 fallback) |
 
 ---
 

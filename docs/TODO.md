@@ -15,6 +15,9 @@
 - **Phase 3**: Configuration deployment (dotfiles integration complete, user configs in dotfiles repo)
 - **Bluetooth**: Removed blueman, replaced with custom Waybar BT widget (in dotfiles repo)
 - **Custom apps**: Generic GitHub release installer (`packages/custom-apps.conf` + `lib/packages.sh`)
+- **Headless remote access**: wayvnc + waypipe servers, virt-viewer/wlvncc-git/tigervnc clients,
+  TTY1 autologin so a rebooted machine brings up a (locked) Sway session with no monitor attached.
+  Driven by `workstation/scripts/headless` in the dotfiles repo
 
 ## Testing
 
@@ -69,7 +72,8 @@ Blueman removed from `packages/workstation.list`.
 - [ ] Error recovery (resume after failure)
 - [ ] Optional module: Gaming (Steam, Lutris, gamemode, mangohud)
 - [ ] Optional module: Remote desktop — RDP side only (remmina, freerdp);
-      VNC is already covered by tigervnc in `packages/workstation.list`
+      VNC is covered by wayvnc + virt-viewer/wlvncc-git/tigervnc in
+      `packages/workstation.list`, driven by the dotfiles `headless` script
 - [ ] Optional module: Container orchestration (k3s, podman)
 - [ ] Encryption support (LUKS)
 - [ ] Btrfs snapshots with Snapper
