@@ -107,6 +107,13 @@ wireguard-tools
 # and the firewall drops 5900-5901 — tunnel over SSH if you ever serve a desktop.
 tigervnc
 
+# Wayland-native VNC server for Sway (headless or screen sharing). Not enabled by
+# default and the firewall drops 5900-5901 — tunnel over SSH to reach it.
+wayvnc
+
+# Forward individual Wayland apps over SSH (Wayland's answer to `ssh -X`)
+waypipe
+
 # File sync / transfer (backups, mirroring, rsync-over-ssh to servers)
 rsync
 
